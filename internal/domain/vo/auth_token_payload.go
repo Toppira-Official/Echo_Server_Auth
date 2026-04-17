@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrAuthTokenPayloadExpiresAtMustBeAfterIssuerAt = errors.New("expires at must be after issuer at")
+	ErrAuthTokenPayloadExpiresAtMustBeAfterIssuedAt = errors.New("expires at must be after issued at")
 )
 
 type AuthTokenPayload struct {
@@ -19,8 +19,8 @@ func NewAuthTokenPayload(
 	userID UserID,
 	issuedAt, expiredAt time.Time,
 ) (AuthTokenPayload, error) {
-	if expiredAt.Before(issuedAt) {
-		return AuthTokenPayload{}, ErrAuthTokenPayloadExpiresAtMustBeAfterIssuerAt
+	if !expiredAt.After(issuedAt) {
+		return AuthTokenPayload{}, ErrAuthTokenPayloadExpiresAtMustBeAfterIssuedAt
 	}
 
 	return AuthTokenPayload{
