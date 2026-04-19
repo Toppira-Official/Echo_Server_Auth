@@ -45,7 +45,7 @@ type RegisterInput struct {
 	Password string
 }
 
-func (r *Register) Execute(ctx context.Context, input LoginInput) (accessToken, refreshToken string, err error) {
+func (r *Register) Execute(ctx context.Context, input RegisterInput) (accessToken, refreshToken string, err error) {
 	credential, err := r.credentialQuery.FindByUsername(ctx, input.Username)
 	if err != nil {
 		if credential != nil {
@@ -64,9 +64,25 @@ func (r *Register) Execute(ctx context.Context, input LoginInput) (accessToken, 
 		return "", "", err
 	}
 
+	userID, err := vo.NewUserID(uuid)
+	if err != nil {
+		return "", "", err
+	}
+
 	now := time.Now().UTC()
+
+	newCredential, err := entity.NewCredential(userID, input.Username, now, hashedPassword)
+	if err != nil {
+		return "", "", err
+	}
+
+	err = r.credentialCommand.Create(ctx, newCredential)
+	if err != nil {
+		return "", "", err
+	}
+
 	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
-	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, expiresAt)
+	accessTokenPayload, err := vo.NewAccessTokenPayload(newCredential.ID(), now, expiresAt)
 	if err != nil {
 		return "", "", err
 	}
@@ -77,21 +93,6 @@ func (r *Register) Execute(ctx context.Context, input LoginInput) (accessToken, 
 	}
 
 	refreshToken, err = r.refreshTokenFactory.Generate()
-	if err != nil {
-		return "", "", err
-	}
-
-	userID, err := vo.NewUserID(uuid)
-	if err != nil {
-		return "", "", err
-	}
-
-	newCredential, err := entity.NewCredential(userID, input.Username, now, hashedPassword)
-	if err != nil {
-		return "", "", err
-	}
-
-	err = r.credentialCommand.Create(ctx, newCredential)
 	if err != nil {
 		return "", "", err
 	}
