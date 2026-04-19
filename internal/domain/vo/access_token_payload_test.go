@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestAuthTokenPayload_NewAuthTokenPayload(t *testing.T) {
+func TestAuthTokenPayload_NewAccessTokenPayload(t *testing.T) {
 	userID, err := NewUserID("123")
 	if err != nil {
 		t.Fatalf("unexpected userID error: %v", err)
@@ -44,7 +44,7 @@ func TestAuthTokenPayload_NewAuthTokenPayload(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		_, err := NewAuthTokenPayload(tt.userID, tt.issuedAt, tt.expiredAt)
+		_, err := NewAccessTokenPayload(tt.userID, tt.issuedAt, tt.expiredAt)
 
 		if tt.expectErr && err == nil {
 			t.Fatalf("[%s] expected error but got nil", tt.name)
@@ -60,7 +60,7 @@ func TestAuthTokenPayload_ExpirationBehavior(t *testing.T) {
 	issuedAt := time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
 	expiredAt := issuedAt.Add(2 * time.Hour)
 
-	payload, err := NewAuthTokenPayload(userID, issuedAt, expiredAt)
+	payload, err := NewAccessTokenPayload(userID, issuedAt, expiredAt)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestAuthTokenPayload_Lifetime(t *testing.T) {
 	issuedAt := time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC)
 	expiredAt := issuedAt.Add(3 * time.Hour)
 
-	payload, _ := NewAuthTokenPayload(userID, issuedAt, expiredAt)
+	payload, _ := NewAccessTokenPayload(userID, issuedAt, expiredAt)
 
 	expectedLifetime := 3 * time.Hour
 	if payload.Lifetime() != expectedLifetime {
@@ -124,7 +124,7 @@ func TestAuthTokenPayload_Immutability(t *testing.T) {
 	issued := time.Now().UTC()
 	expired := issued.Add(30 * time.Minute)
 
-	payload, _ := NewAuthTokenPayload(userID, issued, expired)
+	payload, _ := NewAccessTokenPayload(userID, issued, expired)
 
 	retrievedIssued := payload.IssuedAtUTC()
 	retrievedIssued = retrievedIssued.Add(9999 * time.Hour)
