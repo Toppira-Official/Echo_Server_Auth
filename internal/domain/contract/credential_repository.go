@@ -7,7 +7,7 @@ import (
 )
 
 type CredentialQuery interface {
-	FindByID(ctx context.Context, id vo.UserID) (credential *entity.Credential, err error)
+	FindByID(ctx context.Context, id vo.CredentialID) (credential *entity.Credential, err error)
 	FindByUsername(ctx context.Context, username string) (credential *entity.Credential, err error)
 	ExistsByUsername(ctx context.Context, username string) (exists bool, err error)
 }

@@ -9,7 +9,7 @@ import (
 func TestNewCredential(t *testing.T) {
 	now := time.Now().UTC()
 
-	userID, _ := vo.NewUserID("1")
+	credentialID, _ := vo.NewCredentialID("1")
 
 	hash, _ := vo.NewHashedPassword("$2a$10$abcdefghijklmnopqrstuv")
 
@@ -34,7 +34,7 @@ func TestNewCredential(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			cred, err := NewCredential(
-				userID,
+				credentialID,
 				tt.username,
 				now,
 				hash,
@@ -71,13 +71,13 @@ func TestCredential_ChangePassword(t *testing.T) {
 	now := time.Now().UTC()
 	newTime := now.Add(time.Hour)
 
-	userID, _ := vo.NewUserID("1")
+	credentialID, _ := vo.NewCredentialID("1")
 
 	hash1, _ := vo.NewHashedPassword("$2a$10$abcdefghijklmnopqrstuv")
 	hash2, _ := vo.NewHashedPassword("$2a$10$zzzzzzzzzzzzzzzzzzzzzz")
 
 	cred, _ := NewCredential(
-		userID,
+		credentialID,
 		"ali",
 		now,
 		hash1,

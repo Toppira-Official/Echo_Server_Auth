@@ -15,7 +15,7 @@ var (
 
 type Device struct {
 	id           vo.DeviceID
-	credentialID vo.UserID
+	credentialID vo.CredentialID
 	refreshToken string
 	userAgent    string
 	ipAddress    string

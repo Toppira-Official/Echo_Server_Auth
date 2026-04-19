@@ -64,14 +64,14 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (accessToke
 		return "", "", err
 	}
 
-	userID, err := vo.NewUserID(uuid)
+	credentialID, err := vo.NewCredentialID(uuid)
 	if err != nil {
 		return "", "", err
 	}
 
 	now := time.Now().UTC()
 
-	newCredential, err := entity.NewCredential(userID, input.Username, now, hashedPassword)
+	newCredential, err := entity.NewCredential(credentialID, input.Username, now, hashedPassword)
 	if err != nil {
 		return "", "", err
 	}

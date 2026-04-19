@@ -6,45 +6,45 @@ import (
 )
 
 func TestAuthTokenPayload_NewAccessTokenPayload(t *testing.T) {
-	userID, err := NewUserID("123")
+	credentialID, err := NewCredentialID("123")
 	if err != nil {
-		t.Fatalf("unexpected userID error: %v", err)
+		t.Fatalf("unexpected credentialID error: %v", err)
 	}
 
 	now := time.Now().UTC()
 
 	tests := []struct {
-		name      string
-		userID    UserID
-		issuedAt  time.Time
-		expiredAt time.Time
-		expectErr bool
+		name         string
+		credentialID CredentialID
+		issuedAt     time.Time
+		expiredAt    time.Time
+		expectErr    bool
 	}{
 		{
-			name:      "valid payload",
-			userID:    userID,
-			issuedAt:  now,
-			expiredAt: now.Add(1 * time.Hour),
-			expectErr: false,
+			name:         "valid payload",
+			credentialID: credentialID,
+			issuedAt:     now,
+			expiredAt:    now.Add(1 * time.Hour),
+			expectErr:    false,
 		},
 		{
-			name:      "invalid payload (expiredAt < issuedAt)",
-			userID:    userID,
-			issuedAt:  now,
-			expiredAt: now.Add(-1 * time.Hour),
-			expectErr: true,
+			name:         "invalid payload (expiredAt < issuedAt)",
+			credentialID: credentialID,
+			issuedAt:     now,
+			expiredAt:    now.Add(-1 * time.Hour),
+			expectErr:    true,
 		},
 		{
-			name:      "invalid payload (expiredAt == issuedAt)",
-			userID:    userID,
-			issuedAt:  now,
-			expiredAt: now,
-			expectErr: true,
+			name:         "invalid payload (expiredAt == issuedAt)",
+			credentialID: credentialID,
+			issuedAt:     now,
+			expiredAt:    now,
+			expectErr:    true,
 		},
 	}
 
 	for _, tt := range tests {
-		_, err := NewAccessTokenPayload(tt.userID, tt.issuedAt, tt.expiredAt)
+		_, err := NewAccessTokenPayload(tt.credentialID, tt.issuedAt, tt.expiredAt)
 
 		if tt.expectErr && err == nil {
 			t.Fatalf("[%s] expected error but got nil", tt.name)
@@ -56,11 +56,11 @@ func TestAuthTokenPayload_NewAccessTokenPayload(t *testing.T) {
 }
 
 func TestAuthTokenPayload_ExpirationBehavior(t *testing.T) {
-	userID, _ := NewUserID("abc")
+	credentialID, _ := NewCredentialID("abc")
 	issuedAt := time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
 	expiredAt := issuedAt.Add(2 * time.Hour)
 
-	payload, err := NewAccessTokenPayload(userID, issuedAt, expiredAt)
+	payload, err := NewAccessTokenPayload(credentialID, issuedAt, expiredAt)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -105,12 +105,12 @@ func TestAuthTokenPayload_ExpirationBehavior(t *testing.T) {
 }
 
 func TestAuthTokenPayload_Lifetime(t *testing.T) {
-	userID, _ := NewUserID("xyz")
+	credentialID, _ := NewCredentialID("xyz")
 
 	issuedAt := time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC)
 	expiredAt := issuedAt.Add(3 * time.Hour)
 
-	payload, _ := NewAccessTokenPayload(userID, issuedAt, expiredAt)
+	payload, _ := NewAccessTokenPayload(credentialID, issuedAt, expiredAt)
 
 	expectedLifetime := 3 * time.Hour
 	if payload.Lifetime() != expectedLifetime {
@@ -119,12 +119,12 @@ func TestAuthTokenPayload_Lifetime(t *testing.T) {
 }
 
 func TestAuthTokenPayload_Immutability(t *testing.T) {
-	userID, _ := NewUserID("immutable")
+	credentialID, _ := NewCredentialID("immutable")
 
 	issued := time.Now().UTC()
 	expired := issued.Add(30 * time.Minute)
 
-	payload, _ := NewAccessTokenPayload(userID, issued, expired)
+	payload, _ := NewAccessTokenPayload(credentialID, issued, expired)
 
 	retrievedIssued := payload.IssuedAtUTC()
 	retrievedIssued = retrievedIssued.Add(9999 * time.Hour)

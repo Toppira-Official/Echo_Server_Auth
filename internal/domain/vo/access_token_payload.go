@@ -10,13 +10,13 @@ var (
 )
 
 type AccessTokenPayload struct {
-	userID       UserID
+	credentialID CredentialID
 	issuedAtUTC  time.Time
 	expiredAtUTC time.Time
 }
 
 func NewAccessTokenPayload(
-	userID UserID,
+	credentialID CredentialID,
 	issuedAtUTC, expiredAtUTC time.Time,
 ) (AccessTokenPayload, error) {
 	if !expiredAtUTC.After(issuedAtUTC) {
@@ -24,13 +24,13 @@ func NewAccessTokenPayload(
 	}
 
 	return AccessTokenPayload{
-		userID:       userID,
+		credentialID: credentialID,
 		issuedAtUTC:  issuedAtUTC,
 		expiredAtUTC: expiredAtUTC,
 	}, nil
 }
 
-func (a AccessTokenPayload) UserID() UserID                 { return a.userID }
+func (a AccessTokenPayload) CredentialID() CredentialID           { return a.credentialID }
 func (a AccessTokenPayload) IssuedAtUTC() time.Time         { return a.issuedAtUTC }
 func (a AccessTokenPayload) ExpiredAtUTC() time.Time        { return a.expiredAtUTC }
 func (a AccessTokenPayload) IsExpired(atUTC time.Time) bool { return atUTC.After(a.expiredAtUTC) }
