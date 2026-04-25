@@ -1,1 +1,26 @@
+# Go
+/bin/
+/dist/
+/build/
+/vendor/
+*.exe
+*.test
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Env
 .env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
