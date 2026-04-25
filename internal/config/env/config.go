@@ -2,6 +2,7 @@ package env
 
 import (
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
@@ -20,8 +21,8 @@ type AppConfig struct {
 type AuthConfig struct {
 	TokenSecret string `env:"TOKEN_SECRET" env-required:"true"`
 
-	AccessTokenExpiresInHours int `env:"ACCESS_TOKEN_EXPIRES_IN_HOURS" env-default:"5"`
-	RefreshTokenExpiresInDays int `env:"REFRESH_TOKEN_EXPIRES_IN_DAYS" env-default:"5"`
+	AccessTokenTTL  time.Duration `env:"ACCESS_TOKEN_TTL" env-default:"5h"`
+	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" env-default:"5d"`
 }
 
 func NewConfig() (*Config, error) {

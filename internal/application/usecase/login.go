@@ -1,13 +1,11 @@
 package usecase
 
 import (
-	"auth/internal/config/env"
+	"auth/internal/application/service"
 	"auth/internal/domain/contract"
 	"auth/internal/domain/entity"
-	"auth/internal/domain/vo"
 	"context"
 	"errors"
-	"time"
 )
 
 var (
@@ -15,40 +13,20 @@ var (
 )
 
 type Login struct {
-	credentialQuery     contract.CredentialQuery
-	passwordEncoder     contract.PasswordEncoder
-	accessTokenSigner   contract.AccessTokenSigner
-	refreshTokenFactory contract.RefreshTokenFactory
-	uuidGenerator       contract.UuidGenerator
-	clock               contract.Clock
-	cache               contract.Cache
-	accessTokenTTL      time.Duration
-	refreshTokenTTL     time.Duration
+	credentialQuery contract.CredentialQuery
+	passwordEncoder contract.PasswordEncoder
+	session         *service.Session
 }
 
 func NewLogin(
 	credentialQuery contract.CredentialQuery,
 	passwordEncoder contract.PasswordEncoder,
-	accessTokenSigner contract.AccessTokenSigner,
-	refreshTokenFactory contract.RefreshTokenFactory,
-	uuidGenerator contract.UuidGenerator,
-	clock contract.Clock,
-	cache contract.Cache,
-	envConfig env.Config,
+	session *service.Session,
 ) *Login {
-	accessTokenTTL := time.Duration(envConfig.Auth.AccessTokenExpiresInHours) * time.Hour
-	refreshTokenTTL := time.Duration(envConfig.Auth.RefreshTokenExpiresInDays) * 24 * time.Hour
-
 	return &Login{
-		credentialQuery:     credentialQuery,
-		passwordEncoder:     passwordEncoder,
-		accessTokenSigner:   accessTokenSigner,
-		refreshTokenFactory: refreshTokenFactory,
-		uuidGenerator:       uuidGenerator,
-		clock:               clock,
-		cache:               cache,
-		accessTokenTTL:      accessTokenTTL,
-		refreshTokenTTL:     refreshTokenTTL,
+		credentialQuery: credentialQuery,
+		passwordEncoder: passwordEncoder,
+		session:         session,
 	}
 }
 
@@ -59,8 +37,7 @@ type LoginInput struct {
 	IpAddress string
 }
 type LoginOutput struct {
-	AccessToken  string
-	RefreshToken string
+	service.SessionTokens
 }
 
 func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutput, err error) {
@@ -69,52 +46,13 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 		return output, ErrLoginInvalidCredentials
 	}
 
-	now := l.clock.NowUTC()
-
-	refreshToken, err := l.refreshTokenFactory.Generate()
-	if err != nil {
-		return output, err
-	}
-
-	deviceUUID, err := l.uuidGenerator.Generate()
-	if err != nil {
-		return output, err
-	}
-
-	deviceID, err := vo.NewDeviceID(deviceUUID)
-	if err != nil {
-		return output, err
-	}
-
-	refreshTokenExpiresAt := now.Add(l.refreshTokenTTL)
-
-	newDevice, err := entity.NewDevice(
-		deviceID, refreshToken, refreshTokenExpiresAt,
-		now, input.UserAgent, input.IpAddress,
-	)
-	if err != nil {
-		return output, err
-	}
-
-	cacheKey := "refresh:" + refreshToken
-	if err := l.cache.Set(ctx, cacheKey, newDevice, l.refreshTokenTTL); err != nil {
-		return output, err
-	}
-
-	accessTokenExpiresAt := now.Add(l.accessTokenTTL)
-	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, accessTokenExpiresAt)
-	if err != nil {
-		return output, err
-	}
-
-	accessToken, err := l.accessTokenSigner.Generate(accessTokenPayload)
+	tokens, err := l.session.Create(ctx, credential.ID(), input.UserAgent, input.IpAddress)
 	if err != nil {
 		return output, err
 	}
 
 	return LoginOutput{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		SessionTokens: tokens,
 	}, nil
 }
 
