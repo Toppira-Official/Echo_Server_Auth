@@ -1,10 +1,14 @@
 package config
 
-import "go.uber.org/fx"
+import (
+	"auth/internal/config/env"
+
+	"go.uber.org/fx"
+)
 
 var Module = fx.Module(
 	"config",
 	fx.Provide(
-		NewConfig,
+		env.NewConfig,
 	),
 )
