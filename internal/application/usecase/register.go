@@ -44,58 +44,65 @@ type RegisterInput struct {
 	Username string
 	Password string
 }
+type RegisterOutput struct {
+	AccessToken  string
+	RefreshToken string
+}
 
-func (r *Register) Execute(ctx context.Context, input RegisterInput) (accessToken, refreshToken string, err error) {
+func (r *Register) Execute(ctx context.Context, input RegisterInput) (output RegisterOutput, err error) {
 	credential, err := r.credentialQuery.FindByUsername(ctx, input.Username)
 	if err != nil {
 		if credential != nil {
-			return "", "", ErrRegisterUsernameAlreadyExists
+			return output, ErrRegisterUsernameAlreadyExists
 		}
-		return "", "", err
+		return output, err
 	}
 
 	hashedPassword, err := r.passwordEncoder.Hash(input.Password)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
 	uuid, err := r.uuidGenerator.Generate()
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
 	credentialID, err := vo.NewCredentialID(uuid)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
 	now := time.Now().UTC()
 
 	newCredential, err := entity.NewCredential(credentialID, input.Username, now, hashedPassword)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
 	err = r.credentialCommand.Create(ctx, newCredential)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
 	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
 	accessTokenPayload, err := vo.NewAccessTokenPayload(newCredential.ID(), now, expiresAt)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	accessToken, err = r.accessTokenSigner.Generate(accessTokenPayload)
+	accessToken, err := r.accessTokenSigner.Generate(accessTokenPayload)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	refreshToken, err = r.refreshTokenFactory.Generate()
+	refreshToken, err := r.refreshTokenFactory.Generate()
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	return accessToken, refreshToken, nil
+	output.AccessToken = accessToken
+	output.RefreshToken = refreshToken
+
+	return output, nil
 }

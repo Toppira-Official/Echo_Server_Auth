@@ -37,33 +37,40 @@ type LoginInput struct {
 	Username string
 	Password string
 }
+type LoginOutput struct {
+	AccessToken  string
+	RefreshToken string
+}
 
-func (l *Login) Execute(ctx context.Context, input LoginInput) (accessToken, refreshToken string, err error) {
+func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutput, err error) {
 	credential, err := l.credentialQuery.FindByUsername(ctx, input.Username)
 	if err != nil {
-		return "", "", ErrLoginInvalidCredentials
+		return output, ErrLoginInvalidCredentials
 	}
 
 	if ok, err := l.passwordEncoder.Compare(input.Password, credential.HashedPassword()); err != nil || !ok {
-		return "", "", ErrLoginInvalidCredentials
+		return output, ErrLoginInvalidCredentials
 	}
 
 	now := time.Now().UTC()
 	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
 	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, expiresAt)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	accessToken, err = l.accessTokenSigner.Generate(accessTokenPayload)
+	accessToken, err := l.accessTokenSigner.Generate(accessTokenPayload)
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	refreshToken, err = l.refreshTokenFactory.Generate()
+	refreshToken, err := l.refreshTokenFactory.Generate()
 	if err != nil {
-		return "", "", err
+		return output, err
 	}
 
-	return accessToken, refreshToken, nil
+	output.AccessToken = accessToken
+	output.RefreshToken = refreshToken
+
+	return output, nil
 }
