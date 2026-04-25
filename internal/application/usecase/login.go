@@ -64,12 +64,8 @@ type LoginOutput struct {
 }
 
 func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutput, err error) {
-	credential, err := l.credentialQuery.FindByUsername(ctx, input.Username)
+	credential, err := l.authenticate(ctx, input.Username, input.Password)
 	if err != nil {
-		return output, ErrLoginInvalidCredentials
-	}
-
-	if ok, err := l.passwordEncoder.Compare(input.Password, credential.HashedPassword()); err != nil || !ok {
 		return output, ErrLoginInvalidCredentials
 	}
 
@@ -120,4 +116,17 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (l *Login) authenticate(ctx context.Context, username, password string) (*entity.Credential, error) {
+	credential, err := l.credentialQuery.FindByUsername(ctx, username)
+	if err != nil {
+		return nil, ErrLoginInvalidCredentials
+	}
+
+	if ok, err := l.passwordEncoder.Compare(password, credential.HashedPassword()); err != nil || !ok {
+		return nil, ErrLoginInvalidCredentials
+	}
+
+	return credential, nil
 }
