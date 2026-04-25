@@ -21,6 +21,7 @@ type Register struct {
 	refreshTokenFactory contract.RefreshTokenFactory
 	uuidGenerator       contract.UuidGenerator
 	clock               contract.Clock
+	cache               contract.Cache
 }
 
 func NewRegister(
@@ -31,6 +32,7 @@ func NewRegister(
 	refreshTokenFactory contract.RefreshTokenFactory,
 	uuidGenerator contract.UuidGenerator,
 	clock contract.Clock,
+	cache contract.Cache,
 ) *Register {
 	return &Register{
 		credentialQuery:     credentialQuery,
@@ -40,12 +42,15 @@ func NewRegister(
 		refreshTokenFactory: refreshTokenFactory,
 		uuidGenerator:       uuidGenerator,
 		clock:               clock,
+		cache:               cache,
 	}
 }
 
 type RegisterInput struct {
-	Username string
-	Password string
+	Username  string
+	Password  string
+	UserAgent string
+	IpAddress string
 }
 type RegisterOutput struct {
 	AccessToken  string
@@ -66,12 +71,12 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	uuid, err := r.uuidGenerator.Generate()
+	credentialUUID, err := r.uuidGenerator.Generate()
 	if err != nil {
 		return output, err
 	}
 
-	credentialID, err := vo.NewCredentialID(uuid)
+	credentialID, err := vo.NewCredentialID(credentialUUID)
 	if err != nil {
 		return output, err
 	}
@@ -106,6 +111,31 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 
 	output.AccessToken = accessToken
 	output.RefreshToken = refreshToken
+
+	deviceUUID, err := r.uuidGenerator.Generate()
+	if err != nil {
+		return output, err
+	}
+
+	deviceID, err := vo.NewDeviceID(deviceUUID)
+	if err != nil {
+		return output, err
+	}
+
+	expiresAt = now.Add(8 * time.Hour) // TODO: must come from envs
+
+	newDevice, err := entity.NewDevice(
+		deviceID, refreshToken, expiresAt,
+		now, input.UserAgent, input.IpAddress,
+	)
+	if err != nil {
+		return output, err
+	}
+
+	cacheKey := "device:" + input.UserAgent
+	if err := r.cache.Set(ctx, cacheKey, newDevice, expiresAt.Sub(now)); err != nil {
+		return output, err
+	}
 
 	return output, nil
 }
