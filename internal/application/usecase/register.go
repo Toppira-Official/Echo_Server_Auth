@@ -81,7 +81,7 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	now := r.clock.Now_UTC()
+	now := r.clock.NowUTC()
 
 	newCredential, err := entity.NewCredential(credentialID, input.Username, now, hashedPassword)
 	if err != nil {
@@ -132,7 +132,7 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	cacheKey := "device:" + input.UserAgent
+	cacheKey := "refresh:" + refreshToken
 	if err := r.cache.Set(ctx, cacheKey, newDevice, expiresAt.Sub(now)); err != nil {
 		return output, err
 	}

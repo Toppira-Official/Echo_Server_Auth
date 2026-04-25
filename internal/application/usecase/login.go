@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"auth/internal/config/env"
 	"auth/internal/domain/contract"
 	"auth/internal/domain/entity"
 	"auth/internal/domain/vo"
@@ -21,6 +22,8 @@ type Login struct {
 	uuidGenerator       contract.UuidGenerator
 	clock               contract.Clock
 	cache               contract.Cache
+	accessTokenTTL      time.Duration
+	refreshTokenTTL     time.Duration
 }
 
 func NewLogin(
@@ -31,15 +34,21 @@ func NewLogin(
 	uuidGenerator contract.UuidGenerator,
 	clock contract.Clock,
 	cache contract.Cache,
+	envConfig env.Config,
 ) *Login {
+	accessTokenTTL := time.Duration(envConfig.Auth.AccessTokenExpiresInHours) * time.Hour
+	refreshTokenTTL := time.Duration(envConfig.Auth.RefreshTokenExpiresInDays) * 24 * time.Hour
+
 	return &Login{
 		credentialQuery:     credentialQuery,
 		passwordEncoder:     passwordEncoder,
 		accessTokenSigner:   accessTokenSigner,
 		refreshTokenFactory: refreshTokenFactory,
-		uuidGenerator:       refreshTokenFactory,
+		uuidGenerator:       uuidGenerator,
 		clock:               clock,
 		cache:               cache,
+		accessTokenTTL:      accessTokenTTL,
+		refreshTokenTTL:     refreshTokenTTL,
 	}
 }
 
@@ -64,25 +73,12 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 		return output, ErrLoginInvalidCredentials
 	}
 
-	now := l.clock.Now_UTC()
-	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
-	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, expiresAt)
-	if err != nil {
-		return output, err
-	}
-
-	accessToken, err := l.accessTokenSigner.Generate(accessTokenPayload)
-	if err != nil {
-		return output, err
-	}
+	now := l.clock.NowUTC()
 
 	refreshToken, err := l.refreshTokenFactory.Generate()
 	if err != nil {
 		return output, err
 	}
-
-	output.AccessToken = accessToken
-	output.RefreshToken = refreshToken
 
 	deviceUUID, err := l.uuidGenerator.Generate()
 	if err != nil {
@@ -94,20 +90,34 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 		return output, err
 	}
 
-	expiresAt = now.Add(8 * time.Hour) // TODO: must come from envs
+	refreshTokenExpiresAt := now.Add(l.refreshTokenTTL)
 
 	newDevice, err := entity.NewDevice(
-		deviceID, refreshToken, expiresAt,
+		deviceID, refreshToken, refreshTokenExpiresAt,
 		now, input.UserAgent, input.IpAddress,
 	)
 	if err != nil {
 		return output, err
 	}
 
-	cacheKey := "device:" + input.UserAgent
-	if err := l.cache.Set(ctx, cacheKey, newDevice, expiresAt.Sub(now)); err != nil {
+	cacheKey := "refresh:" + refreshToken
+	if err := l.cache.Set(ctx, cacheKey, newDevice, l.refreshTokenTTL); err != nil {
 		return output, err
 	}
 
-	return output, nil
+	accessTokenExpiresAt := now.Add(l.accessTokenTTL)
+	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, accessTokenExpiresAt)
+	if err != nil {
+		return output, err
+	}
+
+	accessToken, err := l.accessTokenSigner.Generate(accessTokenPayload)
+	if err != nil {
+		return output, err
+	}
+
+	return LoginOutput{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
