@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"auth/internal/config/env"
 	"auth/internal/domain/contract"
 	"auth/internal/domain/entity"
 	"auth/internal/domain/vo"
@@ -22,6 +23,8 @@ type Register struct {
 	uuidGenerator       contract.UuidGenerator
 	clock               contract.Clock
 	cache               contract.Cache
+	accessTokenTTL      time.Duration
+	refreshTokenTTL     time.Duration
 }
 
 func NewRegister(
@@ -33,7 +36,11 @@ func NewRegister(
 	uuidGenerator contract.UuidGenerator,
 	clock contract.Clock,
 	cache contract.Cache,
+	envConfig env.Config,
 ) *Register {
+	accessTokenTTL := time.Duration(envConfig.Auth.AccessTokenExpiresInHours) * time.Hour
+	refreshTokenTTL := time.Duration(envConfig.Auth.RefreshTokenExpiresInDays) * 24 * time.Hour
+
 	return &Register{
 		credentialQuery:     credentialQuery,
 		credentialCommand:   credentialCommand,
@@ -43,6 +50,8 @@ func NewRegister(
 		uuidGenerator:       uuidGenerator,
 		clock:               clock,
 		cache:               cache,
+		accessTokenTTL:      accessTokenTTL,
+		refreshTokenTTL:     refreshTokenTTL,
 	}
 }
 
@@ -93,24 +102,10 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
-	accessTokenPayload, err := vo.NewAccessTokenPayload(newCredential.ID(), now, expiresAt)
-	if err != nil {
-		return output, err
-	}
-
-	accessToken, err := r.accessTokenSigner.Generate(accessTokenPayload)
-	if err != nil {
-		return output, err
-	}
-
 	refreshToken, err := r.refreshTokenFactory.Generate()
 	if err != nil {
 		return output, err
 	}
-
-	output.AccessToken = accessToken
-	output.RefreshToken = refreshToken
 
 	deviceUUID, err := r.uuidGenerator.Generate()
 	if err != nil {
@@ -122,10 +117,10 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	expiresAt = now.Add(8 * time.Hour) // TODO: must come from envs
+	refreshTokenExpiresAt := now.Add(r.refreshTokenTTL)
 
 	newDevice, err := entity.NewDevice(
-		deviceID, refreshToken, expiresAt,
+		deviceID, refreshToken, refreshTokenExpiresAt,
 		now, input.UserAgent, input.IpAddress,
 	)
 	if err != nil {
@@ -133,9 +128,23 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 	}
 
 	cacheKey := "refresh:" + refreshToken
-	if err := r.cache.Set(ctx, cacheKey, newDevice, expiresAt.Sub(now)); err != nil {
+	if err := r.cache.Set(ctx, cacheKey, newDevice, r.refreshTokenTTL); err != nil {
 		return output, err
 	}
 
-	return output, nil
+	accessTokenExpiresAt := now.Add(r.accessTokenTTL)
+	accessTokenPayload, err := vo.NewAccessTokenPayload(newCredential.ID(), now, accessTokenExpiresAt)
+	if err != nil {
+		return output, err
+	}
+
+	accessToken, err := r.accessTokenSigner.Generate(accessTokenPayload)
+	if err != nil {
+		return output, err
+	}
+
+	return RegisterOutput{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
