@@ -20,6 +20,7 @@ type Register struct {
 	accessTokenSigner   contract.AccessTokenSigner
 	refreshTokenFactory contract.RefreshTokenFactory
 	uuidGenerator       contract.UuidGenerator
+	clock               contract.Clock
 }
 
 func NewRegister(
@@ -29,6 +30,7 @@ func NewRegister(
 	accessTokenSigner contract.AccessTokenSigner,
 	refreshTokenFactory contract.RefreshTokenFactory,
 	uuidGenerator contract.UuidGenerator,
+	clock contract.Clock,
 ) *Register {
 	return &Register{
 		credentialQuery:     credentialQuery,
@@ -37,6 +39,7 @@ func NewRegister(
 		accessTokenSigner:   accessTokenSigner,
 		refreshTokenFactory: refreshTokenFactory,
 		uuidGenerator:       uuidGenerator,
+		clock:               clock,
 	}
 }
 
@@ -73,7 +76,7 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		return output, err
 	}
 
-	now := time.Now().UTC()
+	now := r.clock.Now_UTC()
 
 	newCredential, err := entity.NewCredential(credentialID, input.Username, now, hashedPassword)
 	if err != nil {

@@ -17,6 +17,7 @@ type Login struct {
 	passwordEncoder     contract.PasswordEncoder
 	accessTokenSigner   contract.AccessTokenSigner
 	refreshTokenFactory contract.RefreshTokenFactory
+	clock               contract.Clock
 }
 
 func NewLogin(
@@ -24,12 +25,14 @@ func NewLogin(
 	passwordEncoder contract.PasswordEncoder,
 	accessTokenSigner contract.AccessTokenSigner,
 	refreshTokenFactory contract.RefreshTokenFactory,
+	clock contract.Clock,
 ) *Login {
 	return &Login{
 		credentialQuery:     credentialQuery,
 		passwordEncoder:     passwordEncoder,
 		accessTokenSigner:   accessTokenSigner,
 		refreshTokenFactory: refreshTokenFactory,
+		clock:               clock,
 	}
 }
 
@@ -52,7 +55,7 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 		return output, ErrLoginInvalidCredentials
 	}
 
-	now := time.Now().UTC()
+	now := l.clock.Now_UTC()
 	expiresAt := now.Add(8 * time.Hour) // TODO: must come from envs
 	accessTokenPayload, err := vo.NewAccessTokenPayload(credential.ID(), now, expiresAt)
 	if err != nil {
