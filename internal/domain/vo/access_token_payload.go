@@ -30,7 +30,7 @@ func NewAccessTokenPayload(
 	}, nil
 }
 
-func (a AccessTokenPayload) CredentialID() CredentialID           { return a.credentialID }
+func (a AccessTokenPayload) CredentialID() CredentialID     { return a.credentialID }
 func (a AccessTokenPayload) IssuedAtUTC() time.Time         { return a.issuedAtUTC }
 func (a AccessTokenPayload) ExpiredAtUTC() time.Time        { return a.expiredAtUTC }
 func (a AccessTokenPayload) IsExpired(atUTC time.Time) bool { return atUTC.After(a.expiredAtUTC) }

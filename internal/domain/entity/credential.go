@@ -37,7 +37,7 @@ func NewCredential(
 	}, nil
 }
 
-func (c *Credential) ID() vo.CredentialID                     { return c.id }
+func (c *Credential) ID() vo.CredentialID               { return c.id }
 func (c *Credential) Username() string                  { return c.username }
 func (c *Credential) HashedPassword() vo.HashedPassword { return c.hashedPassword }
 func (c *Credential) CreatedAt() time.Time              { return c.createdAt }
