@@ -19,7 +19,7 @@ type AppConfig struct {
 }
 
 type AuthConfig struct {
-	TokenSecret string `env:"TOKEN_SECRET" env-required:"true"`
+	TokenSecret []byte `env:"TOKEN_SECRET" env-required:"true"`
 
 	AccessTokenTTL  time.Duration `env:"ACCESS_TOKEN_TTL" env-default:"5h"`
 	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" env-default:"5d"`

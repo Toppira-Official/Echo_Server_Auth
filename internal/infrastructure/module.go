@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"auth/internal/domain/contract"
+	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/clock"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
@@ -32,6 +33,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			refreshtoken.NewSha256RefreshTokenHasher,
 			fx.As(new(contract.RefreshTokenHasher)),
+		),
+		fx.Annotate(
+			accesstoken.NewJwtAccessTokenSigner,
+			fx.As(new(contract.AccessTokenSigner)),
 		),
 	),
 )
