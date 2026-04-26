@@ -45,8 +45,9 @@ var Module = fx.Module(
 		},
 		func(cfg *env.Config) gin.GinEngineConfig {
 			return gin.GinEngineConfig{
-				Mode: cfg.App.Mode,
-				Port: cfg.App.Port,
+				Mode:    cfg.App.Mode,
+				Port:    cfg.App.Port,
+				Origins: cfg.App.AppOrigins,
 			}
 		},
 	),

@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 )
 
 type GinEngineConfig struct {
-	Mode string
-	Port int
+	Mode    string
+	Port    int
+	Origins []string
 }
 
 func NewGinEngine(lc fx.Lifecycle, cfg GinEngineConfig) *gin.Engine {
@@ -27,6 +29,14 @@ func NewGinEngine(lc fx.Lifecycle, cfg GinEngineConfig) *gin.Engine {
 	}
 
 	r := gin.New()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.Origins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 

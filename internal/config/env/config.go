@@ -16,8 +16,9 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Port int    `env:"PORT" env-required:"true"`
-	Mode string `env:"MODE" env-default:"dev"`
+	Port       int      `env:"PORT" env-required:"true"`
+	Mode       string   `env:"MODE" env-default:"dev"`
+	AppOrigins []string `env:"ORIGINS" env-separator:","`
 }
 
 type AuthConfig struct {
