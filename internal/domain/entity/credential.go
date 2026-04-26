@@ -37,6 +37,26 @@ func NewCredential(
 	}, nil
 }
 
+func RehydrateCredential(
+	id vo.CredentialID,
+	username string,
+	hashedPassword vo.HashedPassword,
+	createdAt time.Time,
+	updatedAt time.Time,
+) (*Credential, error) {
+	if username == "" {
+		return nil, ErrCredentialUsernameRequired
+	}
+
+	return &Credential{
+		id:             id,
+		username:       username,
+		hashedPassword: hashedPassword,
+		createdAt:      createdAt,
+		updatedAt:      updatedAt,
+	}, nil
+}
+
 func (c *Credential) ID() vo.CredentialID               { return c.id }
 func (c *Credential) Username() string                  { return c.username }
 func (c *Credential) HashedPassword() vo.HashedPassword { return c.hashedPassword }
