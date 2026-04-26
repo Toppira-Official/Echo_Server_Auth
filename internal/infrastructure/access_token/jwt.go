@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -37,7 +38,17 @@ func (j *JwtAccessTokenSigner) Generate(payload vo.AccessTokenPayload) (string, 
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(j.secretKey)
+
+	signed, err := token.SignedString(j.secretKey)
+	if err != nil {
+		return "", xerr.Wrap(
+			err,
+			xerr.CodeInternalError,
+			xerr.WithMessage("failed to sign access token"),
+		)
+	}
+
+	return signed, nil
 }
 
 func (s *JwtAccessTokenSigner) Verify(tokenString string) (vo.AccessTokenPayload, error) {
@@ -46,7 +57,10 @@ func (s *JwtAccessTokenSigner) Verify(tokenString string) (vo.AccessTokenPayload
 	token, err := jwt.ParseWithClaims(
 		tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+				return nil, xerr.New(
+					xerr.CodeInvalidToken,
+					xerr.WithMessage("unexpected signing method"),
+				)
 			}
 			return s.secretKey, nil
 		},
@@ -56,16 +70,34 @@ func (s *JwtAccessTokenSigner) Verify(tokenString string) (vo.AccessTokenPayload
 		jwt.WithLeeway(2*time.Second),
 	)
 	if err != nil {
-		return vo.AccessTokenPayload{}, err
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return vo.AccessTokenPayload{}, xerr.New(
+				xerr.CodeExpiredToken,
+				xerr.WithMessage("access token has expired"),
+			)
+		}
+
+		return vo.AccessTokenPayload{}, xerr.Wrap(
+			err,
+			xerr.CodeInvalidToken,
+			xerr.WithMessage("failed to parse access token"),
+		)
 	}
 
 	if !token.Valid {
-		return vo.AccessTokenPayload{}, errors.New("invalid token")
+		return vo.AccessTokenPayload{}, xerr.New(
+			xerr.CodeInvalidToken,
+			xerr.WithMessage("invalid access token"),
+		)
 	}
 
 	credentialID, err := vo.NewCredentialID(claims.ID)
 	if err != nil {
-		return vo.AccessTokenPayload{}, err
+		return vo.AccessTokenPayload{}, xerr.Wrap(
+			err,
+			xerr.CodeInvalidToken,
+			xerr.WithMessage("invalid credential id in token"),
+		)
 	}
 
 	issuedAt := claims.IssuedAt.Time.UTC()
@@ -73,7 +105,11 @@ func (s *JwtAccessTokenSigner) Verify(tokenString string) (vo.AccessTokenPayload
 
 	payload, err := vo.NewAccessTokenPayload(credentialID, issuedAt, expiresAt)
 	if err != nil {
-		return vo.AccessTokenPayload{}, err
+		return vo.AccessTokenPayload{}, xerr.Wrap(
+			err,
+			xerr.CodeInvalidToken,
+			xerr.WithMessage("invalid token payload"),
+		)
 	}
 
 	return payload, nil
