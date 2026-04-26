@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/avast/retry-go"
 	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
@@ -50,7 +51,16 @@ func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 			Logger:      logger.Default.LogMode(loggerMode),
 			PrepareStmt: true,
 		})
-		return err
+		if err != nil {
+			return xerr.Wrap(
+				err,
+				xerr.CodeServiceUnavailable,
+				xerr.WithMessage("failed to open postgres connection"),
+				xerr.WithMeta("host", cfg.Host),
+				xerr.WithMeta("db", cfg.DB),
+			)
+		}
+		return nil
 	}, retry.Attempts(5), retry.Delay(2*time.Second))
 
 	if err != nil {
@@ -59,7 +69,11 @@ func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, xerr.Wrap(
+			err,
+			xerr.CodeInternalError,
+			xerr.WithMessage("failed to retrieve underlying sql.DB from gorm"),
+		)
 	}
 
 	sqlDB.SetMaxIdleConns(20)
@@ -70,11 +84,27 @@ func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			return retry.Do(func() error {
-				return sqlDB.PingContext(ctx)
+				if pingErr := sqlDB.PingContext(ctx); pingErr != nil {
+					return xerr.Wrap(
+						pingErr,
+						xerr.CodeServiceUnavailable,
+						xerr.WithMessage("postgres ping failed"),
+						xerr.WithMeta("host", cfg.Host),
+						xerr.WithMeta("db", cfg.DB),
+					)
+				}
+				return nil
 			}, retry.Attempts(3), retry.Delay(1*time.Second), retry.Context(ctx))
 		},
 		OnStop: func(ctx context.Context) error {
-			return sqlDB.Close()
+			if closeErr := sqlDB.Close(); closeErr != nil {
+				return xerr.Wrap(
+					closeErr,
+					xerr.CodeInternalError,
+					xerr.WithMessage("failed to close postgres connection"),
+				)
+			}
+			return nil
 		},
 	})
 
