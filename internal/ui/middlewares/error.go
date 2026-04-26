@@ -3,6 +3,7 @@ package middlewares
 import (
 	"net/http"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,13 +24,16 @@ func (*Error) Handle() gin.HandlerFunc {
 		}
 
 		last := c.Errors.Last().Err
-		status := c.Writer.Status()
-		if status < 400 {
-			status = http.StatusInternalServerError
+		if xe, ok := last.(*xerr.Error); ok {
+			status := xe.Code().HTTPStatus()
+			if status >= 500 {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, xerr.New(xerr.CodeInternalError))
+				return
+			}
+			c.AbortWithStatusJSON(status, xe)
+			return
 		}
 
-		c.AbortWithStatusJSON(status, gin.H{
-			"error": last.Error(),
-		})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, xerr.New(xerr.CodeInternalError))
 	}
 }
