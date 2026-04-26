@@ -5,6 +5,8 @@ import (
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/clock"
+	"auth/internal/infrastructure/db/gorm/command"
+	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
@@ -20,6 +22,7 @@ var Module = fx.Module(
 		redis.NewClient,
 		postgres.NewDB,
 		gin.NewGinEngine,
+		daoquery.NewDaoQuery,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),
@@ -47,6 +50,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			redis.NewCache,
 			fx.As(new(contract.Cache)),
+		),
+		fx.Annotate(
+			command.NewCredentialCommand,
+			fx.As(new(contract.CredentialCommand)),
 		),
 	),
 )
