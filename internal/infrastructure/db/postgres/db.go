@@ -14,6 +14,7 @@ import (
 )
 
 type DBConfig struct {
+	Mode     string
 	Host     string
 	Port     int
 	User     string
@@ -34,9 +35,19 @@ func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 	var db *gorm.DB
 	var err error
 
+	var loggerMode logger.LogLevel
+	switch cfg.Mode {
+	case "prod":
+	case "production":
+	case "release":
+		loggerMode = logger.Silent
+	default:
+		loggerMode = logger.Warn
+	}
+
 	err = retry.Do(func() error {
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger:      logger.Default.LogMode(logger.Warn),
+			Logger:      logger.Default.LogMode(loggerMode),
 			PrepareStmt: true,
 		})
 		return err
