@@ -43,7 +43,16 @@ func (c *CredentialCommand) Create(ctx context.Context, credential *entity.Crede
 					xerr.WithMeta("entity", "credential"),
 					xerr.WithMeta("constraint", pgErr.ConstraintName),
 				)
+			case "23502": // not_null_violation
+				return xerr.Wrap(
+					err,
+					xerr.CodeBadRequest,
+					xerr.WithMessage("missing required field"),
+					xerr.WithMeta("entity", "credential"),
+					xerr.WithMeta("column", pgErr.ColumnName),
+				)
 			}
+
 		}
 
 		return xerr.Wrap(
