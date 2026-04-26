@@ -10,10 +10,11 @@ import (
 )
 
 type Config struct {
-	App   AppConfig   `env-prefix:"APP_"`
-	Auth  AuthConfig  `env-prefix:"AUTH_"`
-	DB    DBConfig    `env-prefix:"DB_"`
-	Cache CacheConfig `env-prefix:"CACHE_"`
+	App    AppConfig    `env-prefix:"APP_"`
+	Auth   AuthConfig   `env-prefix:"AUTH_"`
+	DB     DBConfig     `env-prefix:"DB_"`
+	Cache  CacheConfig  `env-prefix:"CACHE_"`
+	Logger LoggerConfig `env-prefix:"LOG_"`
 }
 
 type AppConfig struct {
@@ -42,6 +43,15 @@ type CacheConfig struct {
 	RedisHost     string `env:"REDIS_HOST" env-default:"localhost"`
 	RedisPort     int    `env:"REDIS_PORT" env-required:"true"`
 	RedisDB       int    `env:"REDIS_DB" env-required:"true"`
+}
+
+type LoggerConfig struct {
+	Level      string `env:"LEVEL" env-default:"info"`
+	Path       string `env:"PATH" env-default:"./logs/app.log"`
+	MaxSize    int    `env:"MAX_SIZE_MB" env-default:"50"`
+	MaxBackups int    `env:"MAX_BACKUPS" env-default:"10"`
+	MaxAge     int    `env:"MAX_AGE_DAYS" env-default:"30"`
+	Compress   bool   `env:"COMPRESS" env-default:"true"`
 }
 
 func NewConfig() (*Config, error) {

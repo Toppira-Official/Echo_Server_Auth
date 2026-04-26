@@ -9,6 +9,7 @@ import (
 	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/gorm/query"
 	"auth/internal/infrastructure/db/postgres"
+	"auth/internal/infrastructure/logger"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
 	"auth/internal/infrastructure/server/gin"
@@ -24,6 +25,7 @@ var Module = fx.Module(
 		postgres.NewDB,
 		gin.NewGinEngine,
 		daoquery.NewDaoQuery,
+		logger.NewZapLogger,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),

@@ -6,6 +6,7 @@ import (
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/db/postgres"
+	"auth/internal/infrastructure/logger"
 	"auth/internal/infrastructure/server/gin"
 
 	"go.uber.org/fx"
@@ -48,6 +49,16 @@ var Module = fx.Module(
 				Mode:    cfg.App.Mode,
 				Port:    cfg.App.Port,
 				Origins: cfg.App.AppOrigins,
+			}
+		},
+		func(cfg *env.Config) logger.ZapLoggerConfig {
+			return logger.ZapLoggerConfig{
+				Mode:       cfg.App.Mode,
+				LogPath:    cfg.Logger.Path,
+				MaxSize:    cfg.Logger.MaxSize,
+				MaxBackups: cfg.Logger.MaxBackups,
+				MaxAge:     cfg.Logger.MaxAge,
+				Compress:   cfg.Logger.Compress,
 			}
 		},
 	),
