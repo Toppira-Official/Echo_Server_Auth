@@ -6,6 +6,7 @@ import (
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/db/postgres"
+	"auth/internal/infrastructure/server/gin"
 
 	"go.uber.org/fx"
 )
@@ -40,6 +41,12 @@ var Module = fx.Module(
 				User:     cfg.DB.PostgresUser,
 				Password: cfg.DB.PostgresPassword,
 				DB:       cfg.DB.PostgresDB,
+			}
+		},
+		func(cfg *env.Config) gin.GinEngineConfig {
+			return gin.GinEngineConfig{
+				Mode: cfg.App.Mode,
+				Port: cfg.App.Port,
 			}
 		},
 	),

@@ -8,6 +8,7 @@ import (
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
+	"auth/internal/infrastructure/server/gin"
 	"auth/internal/infrastructure/uuid"
 
 	"go.uber.org/fx"
@@ -18,6 +19,7 @@ var Module = fx.Module(
 	fx.Provide(
 		redis.NewClient,
 		postgres.NewDB,
+		gin.NewGinEngine,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),
