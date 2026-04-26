@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp ./cmd"
+bin = "./tmp"
+full_bin = "./tmp"
+include_ext = ["go"]
+exclude_dir = ["vendor", "bin", "tmp"]
+
+[log]
+level = "info"
