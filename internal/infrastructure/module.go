@@ -5,7 +5,7 @@ import (
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/clock"
-	"auth/internal/infrastructure/db"
+	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
 	"auth/internal/infrastructure/uuid"
@@ -17,7 +17,7 @@ var Module = fx.Module(
 	"infrastructure",
 	fx.Provide(
 		redis.NewClient,
-		db.NewPostgresGormDB,
+		postgres.NewDB,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),

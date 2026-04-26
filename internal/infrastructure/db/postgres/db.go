@@ -1,4 +1,4 @@
-package db
+package postgres
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type PostgresGormDBConfig struct {
+type DBConfig struct {
 	Host     string
 	Port     int
 	User     string
@@ -21,7 +21,7 @@ type PostgresGormDBConfig struct {
 	DB       string
 }
 
-func NewPostgresGormDB(lc fx.Lifecycle, cfg PostgresGormDBConfig) (*gorm.DB, *sql.DB, error) {
+func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=UTC",
 		cfg.Host,

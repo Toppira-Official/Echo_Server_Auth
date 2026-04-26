@@ -5,7 +5,7 @@ import (
 	"auth/internal/config/env"
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
-	"auth/internal/infrastructure/db"
+	"auth/internal/infrastructure/db/postgres"
 
 	"go.uber.org/fx"
 )
@@ -33,8 +33,8 @@ var Module = fx.Module(
 				DB:       cfg.Cache.RedisDB,
 			}
 		},
-		func(cfg *env.Config) db.PostgresGormDBConfig {
-			return db.PostgresGormDBConfig{
+		func(cfg *env.Config) postgres.DBConfig {
+			return postgres.DBConfig{
 				Host:     cfg.DB.PostgresHost,
 				Port:     cfg.DB.PostgresPort,
 				User:     cfg.DB.PostgresUser,
