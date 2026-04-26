@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	_ "github.com/Ali127Dev/xerr"
 	"github.com/gin-gonic/gin"
 )
@@ -34,7 +35,9 @@ func NewLogin(loginUsecase *usecase.Login) *Login {
 func (l *Login) Login(c *gin.Context) {
 	var input dto.LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.Error(err)
+		c.Error(
+			xerr.Wrap(err, xerr.CodeBadRequest, xerr.WithMessage("invalid request body")),
+		)
 		return
 	}
 
@@ -50,7 +53,7 @@ func (l *Login) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, dto.LoginOutput{
+	c.JSON(http.StatusOK, dto.LoginOutput{
 		AccessToken:           loginUsecaseOutput.AccessToken,
 		RefreshToken:          loginUsecaseOutput.RefreshToken,
 		AccessTokenExpiresAt:  loginUsecaseOutput.AccessTokenExpiresAt.Format(time.RFC3339),

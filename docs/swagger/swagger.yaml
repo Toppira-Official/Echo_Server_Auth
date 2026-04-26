@@ -117,11 +117,17 @@ paths:
           schema:
             $ref: '#/definitions/RegisterOutput'
         "400":
-          description: Invalid input or business error
+          description: Invalid input
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/xerr.Error'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/xerr.Error'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/xerr.Error'
       summary: Register a new user account
       tags:
       - Authentication

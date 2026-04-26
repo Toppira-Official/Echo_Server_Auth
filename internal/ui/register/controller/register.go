@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,12 +27,18 @@ func NewRegister(registerUsecase *usecase.Register) *Register {
 //	@Produce		json
 //	@Param			body	body		dto.RegisterInput	true	"User registration input"
 //	@Success		201		{object}	dto.RegisterOutput
-//	@Failure		400		{object}	map[string]string	"Invalid input or business error"
+//	@Failure		400		{object}	xerr.Error	"Invalid input"
+//	@Failure		401		{object}	xerr.Error	"Invalid credentials"
+//	@Failure		500		{object}	xerr.Error	"Internal server error"
 //	@Router			/api/v1/auth/register [post]
 func (r *Register) Register(c *gin.Context) {
 	var input dto.RegisterInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.Error(err)
+		c.Error(
+			c.Error(
+				xerr.Wrap(err, xerr.CodeBadRequest, xerr.WithMessage("invalid request body")),
+			),
+		)
 		return
 	}
 
