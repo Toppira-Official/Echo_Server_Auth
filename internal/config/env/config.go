@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
@@ -50,7 +51,7 @@ func NewConfig() (*Config, error) {
 
 	var cfg Config
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
-		return nil, err
+		return nil, xerr.Wrap(err, xerr.CodeInternalError, xerr.WithMessage("failed to initialize envs"))
 	}
 
 	return &cfg, nil
