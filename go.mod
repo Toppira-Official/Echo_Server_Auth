@@ -3,7 +3,7 @@ module auth
 go 1.25.0
 
 require (
-	github.com/Ali127Dev/xerr v1.0.0
+	github.com/Ali127Dev/xerr v1.1.1
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0

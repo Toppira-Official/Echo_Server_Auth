@@ -27,9 +27,9 @@ func NewRegister(registerUsecase *usecase.Register) *Register {
 //	@Produce		json
 //	@Param			body	body		dto.RegisterInput	true	"User registration input"
 //	@Success		201		{object}	dto.RegisterOutput
-//	@Failure		400		{object}	xerr.Error	"Invalid input"
-//	@Failure		401		{object}	xerr.Error	"Invalid credentials"
-//	@Failure		500		{object}	xerr.Error	"Internal server error"
+//	@Failure		400		{object}	xerr.SwaggerErrOutput	"Invalid input"
+//	@Failure		401		{object}	xerr.SwaggerErrOutput	"Invalid credentials"
+//	@Failure		500		{object}	xerr.SwaggerErrOutput	"Internal server error"
 //	@Router			/api/v1/auth/register [post]
 func (r *Register) Register(c *gin.Context) {
 	var input dto.RegisterInput

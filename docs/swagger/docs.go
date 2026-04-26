@@ -53,19 +53,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid input",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     },
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -105,19 +105,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Invalid input",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     },
                     "401": {
                         "description": "Invalid credentials",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/xerr.Error"
+                            "$ref": "#/definitions/Error"
                         }
                     }
                 }
@@ -125,6 +125,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "INVALID_ARGUMENT"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "invalid request body"
+                },
+                "meta": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "error": "invalid_length",
+                        "field": "username"
+                    }
+                }
+            }
+        },
         "LoginInput": {
             "type": "object",
             "required": [
@@ -200,9 +223,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "xerr.Error": {
-            "type": "object"
         }
     }
 }`

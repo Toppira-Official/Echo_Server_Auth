@@ -28,9 +28,9 @@ func NewLogin(loginUsecase *usecase.Login) *Login {
 //	@Produce		json
 //	@Param			body	body		dto.LoginInput	true	"User login credentials"
 //	@Success		200		{object}	dto.LoginOutput
-//	@Failure		400		{object}	xerr.Error	"Invalid input"
-//	@Failure		401		{object}	xerr.Error	"Invalid credentials"
-//	@Failure		500		{object}	xerr.Error	"Internal server error"
+//	@Failure		400		{object}	xerr.SwaggerErrOutput	"Invalid input"
+//	@Failure		401		{object}	xerr.SwaggerErrOutput	"Invalid credentials"
+//	@Failure		500		{object}	xerr.SwaggerErrOutput	"Internal server error"
 //	@Router			/api/v1/auth/login [post]
 func (l *Login) Login(c *gin.Context) {
 	var input dto.LoginInput
