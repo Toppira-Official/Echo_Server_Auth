@@ -34,12 +34,16 @@ definitions:
   LoginOutput:
     properties:
       access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
         type: string
       access_token_expires_at:
+        example: "2026-04-27T12:00:00Z"
         type: string
       refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh
         type: string
       refresh_token_expires_at:
+        example: "2026-05-27T12:00:00Z"
         type: string
     type: object
   RegisterInput:
@@ -61,12 +65,16 @@ definitions:
   RegisterOutput:
     properties:
       access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
         type: string
       access_token_expires_at:
+        example: "2026-04-27T12:00:00Z"
         type: string
       refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh
         type: string
       refresh_token_expires_at:
+        example: "2026-05-27T12:00:00Z"
         type: string
     type: object
 info:

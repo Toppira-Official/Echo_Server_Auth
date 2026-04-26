@@ -173,16 +173,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
                 },
                 "access_token_expires_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-04-27T12:00:00Z"
                 },
                 "refresh_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh"
                 },
                 "refresh_token_expires_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-05-27T12:00:00Z"
                 }
             }
         },
@@ -211,16 +215,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
                 },
                 "access_token_expires_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-04-27T12:00:00Z"
                 },
                 "refresh_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh"
                 },
                 "refresh_token_expires_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2026-05-27T12:00:00Z"
                 }
             }
         }
