@@ -4,7 +4,7 @@ import (
 	"auth/internal/application/service"
 	"auth/internal/config/env"
 	accesstoken "auth/internal/infrastructure/access_token"
-	"auth/internal/infrastructure/cache"
+	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/db"
 
 	"go.uber.org/fx"
@@ -25,8 +25,8 @@ var Module = fx.Module(
 				SecretKey: cfg.Auth.TokenSecret,
 			}
 		},
-		func(cfg *env.Config) cache.RedisClientConfig {
-			return cache.RedisClientConfig{
+		func(cfg *env.Config) redis.ClientConfig {
+			return redis.ClientConfig{
 				Host:     cfg.Cache.RedisHost,
 				Password: cfg.Cache.RedisPassword,
 				Port:     cfg.Cache.RedisPort,

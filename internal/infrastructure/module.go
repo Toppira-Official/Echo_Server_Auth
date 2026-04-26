@@ -3,7 +3,7 @@ package infrastructure
 import (
 	"auth/internal/domain/contract"
 	accesstoken "auth/internal/infrastructure/access_token"
-	"auth/internal/infrastructure/cache"
+	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/clock"
 	"auth/internal/infrastructure/db"
 	"auth/internal/infrastructure/password"
@@ -16,7 +16,7 @@ import (
 var Module = fx.Module(
 	"infrastructure",
 	fx.Provide(
-		cache.NewRedisClient,
+		redis.NewClient,
 		db.NewPostgresGormDB,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
@@ -43,7 +43,7 @@ var Module = fx.Module(
 			fx.As(new(contract.AccessTokenSigner)),
 		),
 		fx.Annotate(
-			cache.NewRedisCache,
+			redis.NewCache,
 			fx.As(new(contract.Cache)),
 		),
 	),

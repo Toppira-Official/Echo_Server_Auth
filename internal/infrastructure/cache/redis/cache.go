@@ -1,4 +1,4 @@
-package cache
+package redis
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisCache struct {
+type Cache struct {
 	client *redis.Client
 }
 
-func NewRedisCache(client *redis.Client) *RedisCache {
-	return &RedisCache{client: client}
+func NewCache(client *redis.Client) *Cache {
+	return &Cache{client: client}
 }
 
-func (r *RedisCache) Get(ctx context.Context, key string, dest any) (err error) {
+func (r *Cache) Get(ctx context.Context, key string, dest any) (err error) {
 	if dest == nil {
 		return fmt.Errorf("redis get: dest cannot be nil")
 	}
@@ -38,7 +38,7 @@ func (r *RedisCache) Get(ctx context.Context, key string, dest any) (err error) 
 	return nil
 }
 
-func (r *RedisCache) Set(ctx context.Context, key string, value any, ttl time.Duration) (err error) {
+func (r *Cache) Set(ctx context.Context, key string, value any, ttl time.Duration) (err error) {
 	data, err := json.Marshal(value)
 	if err != nil {
 		return fmt.Errorf("redis marshal key=%s: %w", key, err)
@@ -51,7 +51,7 @@ func (r *RedisCache) Set(ctx context.Context, key string, value any, ttl time.Du
 	return nil
 }
 
-func (r *RedisCache) Delete(ctx context.Context, key string) error {
+func (r *Cache) Delete(ctx context.Context, key string) error {
 	if err := r.client.Del(ctx, key).Err(); err != nil {
 		return fmt.Errorf("redis delete key=%s: %w", key, err)
 	}

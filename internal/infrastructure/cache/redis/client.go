@@ -1,4 +1,4 @@
-package cache
+package redis
 
 import (
 	"context"
@@ -10,14 +10,14 @@ import (
 	"go.uber.org/fx"
 )
 
-type RedisClientConfig struct {
+type ClientConfig struct {
 	Host     string
 	Password string
 	Port     int
 	DB       int
 }
 
-func NewRedisClient(lc fx.Lifecycle, cfg RedisClientConfig) *redis.Client {
+func NewClient(lc fx.Lifecycle, cfg ClientConfig) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:            fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password:        cfg.Password,
