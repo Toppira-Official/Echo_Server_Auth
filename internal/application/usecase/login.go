@@ -5,11 +5,12 @@ import (
 	"auth/internal/domain/contract"
 	"auth/internal/domain/entity"
 	"context"
-	"errors"
+
+	"github.com/Ali127Dev/xerr"
 )
 
 var (
-	ErrLoginInvalidCredentials = errors.New("username or password is invalid")
+	ErrLoginInvalidCredentials = xerr.New(xerr.CodePermissionDenied, xerr.WithMessage("username or password is invalid"))
 )
 
 type Login struct {

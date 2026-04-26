@@ -6,11 +6,6 @@ import (
 	"auth/internal/domain/entity"
 	"auth/internal/domain/vo"
 	"context"
-	"errors"
-)
-
-var (
-	ErrRegisterUsernameAlreadyExists = errors.New("username already exists")
 )
 
 type Register struct {
@@ -67,14 +62,6 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 }
 
 func (r *Register) authenticate(ctx context.Context, username, password string) (*entity.Credential, error) {
-	credential, err := r.credentialQuery.FindByUsername(ctx, username)
-	if err != nil {
-		if credential != nil {
-			return nil, ErrRegisterUsernameAlreadyExists
-		}
-		return nil, err
-	}
-
 	hashedPassword, err := r.passwordEncoder.Hash(password)
 	if err != nil {
 		return nil, err
