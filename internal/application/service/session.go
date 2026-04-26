@@ -20,6 +20,7 @@ type Session struct {
 	clock                 contract.Clock
 	accessTokenSigner     contract.AccessTokenSigner
 	refreshTokenGenerator contract.RefreshTokenGenerator
+	refreshTokenHasher    contract.RefreshTokenHasher
 	uuidGenerator         contract.UuidGenerator
 }
 
@@ -28,6 +29,7 @@ func NewSession(
 	clock contract.Clock,
 	accessTokenSigner contract.AccessTokenSigner,
 	refreshTokenGenerator contract.RefreshTokenGenerator,
+	refreshTokenHasher contract.RefreshTokenHasher,
 	uuidGenerator contract.UuidGenerator,
 	cfg SessionConfig,
 ) *Session {
@@ -38,6 +40,7 @@ func NewSession(
 		clock:                 clock,
 		accessTokenSigner:     accessTokenSigner,
 		refreshTokenGenerator: refreshTokenGenerator,
+		refreshTokenHasher:    refreshTokenHasher,
 		uuidGenerator:         uuidGenerator,
 	}
 }
@@ -60,6 +63,11 @@ func (s *Session) Create(
 		return output, err
 	}
 
+	refreshTokenHash, err := s.refreshTokenHasher.Hash(refreshToken)
+	if err != nil {
+		return output, err
+	}
+
 	deviceUUID, err := s.uuidGenerator.Generate()
 	if err != nil {
 		return output, err
@@ -73,14 +81,14 @@ func (s *Session) Create(
 	refreshTokenExpiresAt := now.Add(s.refreshTokenTTL)
 
 	newDevice, err := entity.NewDevice(
-		deviceID, refreshToken, refreshTokenExpiresAt,
+		deviceID, refreshTokenHash, refreshTokenExpiresAt,
 		now, userAgent, ipAddress,
 	)
 	if err != nil {
 		return output, err
 	}
 
-	cacheKey := "refresh:" + refreshToken
+	cacheKey := "refresh:" + refreshTokenHash
 	if err := s.cache.Set(ctx, cacheKey, newDevice, s.refreshTokenTTL); err != nil {
 		return output, err
 	}
