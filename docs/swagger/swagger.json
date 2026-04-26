@@ -1,0 +1,14 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Echo is a social media platform where people can freely share their feelings without being judged.",
+        "title": "Echo Swagger Document",
+        "contact": {
+            "name": "Ali Moradi",
+            "url": "toppira.com/support",
+            "email": "info@toppira.com"
+        },
+        "version": "0.0.1"
+    },
+    "paths": {}
+}

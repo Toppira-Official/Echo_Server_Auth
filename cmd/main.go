@@ -8,6 +8,13 @@ import (
 	"go.uber.org/fx"
 )
 
+//	@title			Echo Swagger Document
+//	@version		0.0.1
+//	@description	Echo is a social media platform where people can freely share their feelings without being judged.
+
+// @contact.name	Ali Moradi
+// @contact.url	toppira.com/support
+// @contact.email	info@toppira.com
 func main() {
 	fx.
 		New(

@@ -81,7 +81,7 @@ tasks:
   swag:
     desc: generate swagger docs
     cmds:
-      - swag init -g {{.CMD_DIR}}/main.go -o {{.SWAGGER_DOCS_DIR}}
+      - swag init -g {{.CMD_DIR}}/main.go -o {{.SWAGGER_DOCS_DIR}} --pd
 
   # -------------------------
   # migrations

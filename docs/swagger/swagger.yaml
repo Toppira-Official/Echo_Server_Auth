@@ -1,0 +1,11 @@
+info:
+  contact:
+    email: info@toppira.com
+    name: Ali Moradi
+    url: toppira.com/support
+  description: Echo is a social media platform where people can freely share their
+    feelings without being judged.
+  title: Echo Swagger Document
+  version: 0.0.1
+paths: {}
+swagger: "2.0"
