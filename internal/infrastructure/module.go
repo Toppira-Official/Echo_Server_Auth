@@ -27,7 +27,11 @@ var Module = fx.Module(
 		),
 		fx.Annotate(
 			refreshtoken.NewRandomRefreshTokenFactory,
-			fx.As(new(contract.RefreshTokenFactory)),
+			fx.As(new(contract.RefreshTokenGenerator)),
+		),
+		fx.Annotate(
+			refreshtoken.NewSha256RefreshTokenHasher,
+			fx.As(new(contract.RefreshTokenHasher)),
 		),
 	),
 )

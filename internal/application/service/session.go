@@ -14,31 +14,31 @@ type SessionConfig struct {
 }
 
 type Session struct {
-	cache               contract.Cache
-	accessTokenTTL      time.Duration
-	refreshTokenTTL     time.Duration
-	clock               contract.Clock
-	accessTokenSigner   contract.AccessTokenSigner
-	refreshTokenFactory contract.RefreshTokenFactory
-	uuidGenerator       contract.UuidGenerator
+	cache                 contract.Cache
+	accessTokenTTL        time.Duration
+	refreshTokenTTL       time.Duration
+	clock                 contract.Clock
+	accessTokenSigner     contract.AccessTokenSigner
+	refreshTokenGenerator contract.RefreshTokenGenerator
+	uuidGenerator         contract.UuidGenerator
 }
 
 func NewSession(
 	cache contract.Cache,
 	clock contract.Clock,
 	accessTokenSigner contract.AccessTokenSigner,
-	refreshTokenFactory contract.RefreshTokenFactory,
+	refreshTokenGenerator contract.RefreshTokenGenerator,
 	uuidGenerator contract.UuidGenerator,
 	cfg SessionConfig,
 ) *Session {
 	return &Session{
-		cache:               cache,
-		accessTokenTTL:      cfg.AccessTokenTTL,
-		refreshTokenTTL:     cfg.RefreshTokenTTL,
-		clock:               clock,
-		accessTokenSigner:   accessTokenSigner,
-		refreshTokenFactory: refreshTokenFactory,
-		uuidGenerator:       uuidGenerator,
+		cache:                 cache,
+		accessTokenTTL:        cfg.AccessTokenTTL,
+		refreshTokenTTL:       cfg.RefreshTokenTTL,
+		clock:                 clock,
+		accessTokenSigner:     accessTokenSigner,
+		refreshTokenGenerator: refreshTokenGenerator,
+		uuidGenerator:         uuidGenerator,
 	}
 }
 
@@ -55,7 +55,7 @@ func (s *Session) Create(
 ) (output SessionTokens, err error) {
 	now := s.clock.NowUTC()
 
-	refreshToken, err := s.refreshTokenFactory.Generate()
+	refreshToken, err := s.refreshTokenGenerator.Generate()
 	if err != nil {
 		return output, err
 	}
