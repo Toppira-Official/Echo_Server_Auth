@@ -55,11 +55,7 @@ func NewClient(lc fx.Lifecycle, cfg ClientConfig) *redis.Client {
 			)
 
 			if err != nil {
-				return xerr.Wrap(
-					err,
-					xerr.CodeServiceUnavailable,
-					xerr.WithMessage("redis connection retries exhausted"),
-				)
+				return err
 			}
 
 			return nil
