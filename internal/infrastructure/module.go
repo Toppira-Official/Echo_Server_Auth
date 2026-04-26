@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"auth/internal/domain/contract"
 	accesstoken "auth/internal/infrastructure/access_token"
+	"auth/internal/infrastructure/cache"
 	"auth/internal/infrastructure/clock"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
@@ -14,6 +15,7 @@ import (
 var Module = fx.Module(
 	"infrastructure",
 	fx.Provide(
+		cache.NewRedisClient,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),
