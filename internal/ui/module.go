@@ -1,14 +1,20 @@
 package ui
 
 import (
-	"auth/internal/ui/doc/router"
+	docsrouter "auth/internal/ui/doc/router"
+	"auth/internal/ui/register/controller"
+	registerrouter "auth/internal/ui/register/router"
 
 	"go.uber.org/fx"
 )
 
 var Module = fx.Module(
 	"ui",
+	fx.Provide(
+		controller.NewRegister,
+	),
 	fx.Invoke(
-		router.RegisterSwaggerRoutes,
+		docsrouter.RegisterSwaggerRoutes,
+		registerrouter.RegisterAuthRegisterRoutes,
 	),
 )
