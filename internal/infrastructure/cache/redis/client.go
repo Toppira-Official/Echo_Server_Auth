@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/avast/retry-go"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
@@ -35,9 +36,16 @@ func NewClient(lc fx.Lifecycle, cfg ClientConfig) *redis.Client {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			return retry.Do(
+			err := retry.Do(
 				func() error {
-					return rdb.Ping(ctx).Err()
+					if err := rdb.Ping(ctx).Err(); err != nil {
+						return xerr.Wrap(
+							err,
+							xerr.CodeServiceUnavailable,
+							xerr.WithMessage("redis is not reachable"),
+						)
+					}
+					return nil
 				},
 				retry.Attempts(5),
 				retry.Delay(2*time.Second),
@@ -45,9 +53,26 @@ func NewClient(lc fx.Lifecycle, cfg ClientConfig) *redis.Client {
 				retry.LastErrorOnly(true),
 				retry.Context(ctx),
 			)
+
+			if err != nil {
+				return xerr.Wrap(
+					err,
+					xerr.CodeServiceUnavailable,
+					xerr.WithMessage("redis connection retries exhausted"),
+				)
+			}
+
+			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return rdb.Close()
+			if err := rdb.Close(); err != nil {
+				return xerr.Wrap(
+					err,
+					xerr.CodeInternalError,
+					xerr.WithMessage("failed to close redis client"),
+				)
+			}
+			return nil
 		},
 	})
 
