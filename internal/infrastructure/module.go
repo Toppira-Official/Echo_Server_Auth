@@ -42,5 +42,9 @@ var Module = fx.Module(
 			accesstoken.NewJwtAccessTokenSigner,
 			fx.As(new(contract.AccessTokenSigner)),
 		),
+		fx.Annotate(
+			cache.NewRedisCache,
+			fx.As(new(contract.Cache)),
+		),
 	),
 )
