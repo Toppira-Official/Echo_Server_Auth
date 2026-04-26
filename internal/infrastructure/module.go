@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"auth/internal/domain/contract"
 	"auth/internal/infrastructure/clock"
+	"auth/internal/infrastructure/password"
 	"auth/internal/infrastructure/uuid"
 
 	"go.uber.org/fx"
@@ -18,6 +19,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			clock.NewSystemClock,
 			fx.As(new(contract.Clock)),
+		),
+		fx.Annotate(
+			password.NewBcryptPasswordEncoder,
+			fx.As(new(contract.PasswordEncoder)),
 		),
 	),
 )
