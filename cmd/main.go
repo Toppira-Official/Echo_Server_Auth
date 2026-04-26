@@ -4,8 +4,11 @@ import (
 	"auth/internal/application"
 	"auth/internal/config"
 	"auth/internal/infrastructure"
+	"auth/internal/ui"
 
 	"go.uber.org/fx"
+
+	_ "auth/docs/swagger"
 )
 
 //	@title			Echo Swagger Document
@@ -21,6 +24,7 @@ func main() {
 			config.Module,
 			application.Module,
 			infrastructure.Module,
+			ui.Module,
 		).
 		Run()
 }
