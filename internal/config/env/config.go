@@ -9,8 +9,10 @@ import (
 )
 
 type Config struct {
-	App  AppConfig  `env-prefix:"APP_"`
-	Auth AuthConfig `env-prefix:"AUTH_"`
+	App   AppConfig   `env-prefix:"APP_"`
+	Auth  AuthConfig  `env-prefix:"AUTH_"`
+	DB    DBConfig    `env-prefix:"DB_"`
+	Cache CacheConfig `env-prefix:"CACHE_"`
 }
 
 type AppConfig struct {
@@ -23,6 +25,21 @@ type AuthConfig struct {
 
 	AccessTokenTTL  time.Duration `env:"ACCESS_TOKEN_TTL" env-default:"5h"`
 	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" env-default:"5d"`
+}
+
+type DBConfig struct {
+	PostgresUser     string `env:"POSTGRES_USER" env-required:"true"`
+	PostgresPassword string `env:"POSTGRES_PASSWORD" env-required:"true"`
+	PostgresHost     string `env:"POSTGRES_HOST" env-default:"localhost"`
+	PostgresPort     int    `env:"POSTGRES_PORT" env-required:"true"`
+	PostgresDB       string `env:"POSTGRES_DB" env-required:"true"`
+}
+
+type CacheConfig struct {
+	RedisPassword string `env:"REDIS_PASSWORD" env-required:"true"`
+	RedisHost     string `env:"REDIS_HOST" env-default:"localhost"`
+	RedisPort     int    `env:"REDIS_PORT" env-required:"true"`
+	RedisDB       int    `env:"REDIS_DB" env-required:"true"`
 }
 
 func NewConfig() (*Config, error) {
