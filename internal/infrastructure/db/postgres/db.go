@@ -48,8 +48,9 @@ func NewDB(lc fx.Lifecycle, cfg DBConfig) (*gorm.DB, *sql.DB, error) {
 
 	err = retry.Do(func() error {
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger:      logger.Default.LogMode(loggerMode),
-			PrepareStmt: true,
+			Logger:         logger.Default.LogMode(loggerMode),
+			PrepareStmt:    true,
+			TranslateError: true,
 		})
 		if err != nil {
 			return xerr.Wrap(
