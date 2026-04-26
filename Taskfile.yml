@@ -7,6 +7,7 @@ dotenv: [".env"]
 vars:
   APP_NAME: echo
   CMD_DIR: ./cmd
+  DAO_GEN_DIR: ./cmd/gen
   SWAGGER_DOCS_DIR: ./docs/swagger
   MIGRATIONS_DIR: ./internal/infrastructure/db/migration
   GOOSE_DRIVER: postgres
@@ -113,3 +114,12 @@ tasks:
     desc: show status
     cmds:
       - goose -dir {{.MIGRATIONS_DIR}} {{.GOOSE_DRIVER}} "{{.GOOSE_DB}}" status
+
+  # -------------------------
+  # migrations
+  # -------------------------
+
+  dao:gen:
+    desc: generate dao
+    cmds:
+      - go run {{.DAO_GEN_DIR}}/main.go
