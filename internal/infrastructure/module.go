@@ -7,6 +7,7 @@ import (
 	"auth/internal/infrastructure/clock"
 	"auth/internal/infrastructure/db/gorm/command"
 	"auth/internal/infrastructure/db/gorm/daoquery"
+	"auth/internal/infrastructure/db/gorm/query"
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
@@ -54,6 +55,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			command.NewCredentialCommand,
 			fx.As(new(contract.CredentialCommand)),
+		),
+		fx.Annotate(
+			query.NewCredentialQuery,
+			fx.As(new(contract.CredentialQuery)),
 		),
 	),
 )
