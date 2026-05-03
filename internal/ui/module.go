@@ -19,9 +19,9 @@ var Module = fx.Module(
 		middlewares.NewError,
 	),
 	fx.Invoke(
+		middlewares.RegisterErrorMiddleware,
 		docsrouter.RegisterSwaggerRoutes,
 		registerrouter.RegisterAuthRegisterRoutes,
-		middlewares.RegisterErrorMiddleware,
 		loginrouter.RegisterAuthLoginRoutes,
 	),
 )
