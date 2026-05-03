@@ -8,6 +8,7 @@ import (
 	"auth/internal/infrastructure/db/gorm/command"
 	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/gorm/query"
+	"auth/internal/infrastructure/db/gorm/transaction"
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/kafka"
 	"auth/internal/infrastructure/logger"
@@ -67,6 +68,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			kafka.NewDispatcher,
 			fx.As(new(contract.EventDispatcher)),
+		),
+		fx.Annotate(
+			transaction.NewGormTransaction,
+			fx.As(new(contract.TransactionProvider)),
 		),
 	),
 )
