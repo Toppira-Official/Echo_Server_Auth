@@ -52,7 +52,6 @@ func (c *CredentialCommand) Create(ctx context.Context, credential *entity.Crede
 					xerr.WithMeta("column", pgErr.ColumnName),
 				)
 			}
-
 		}
 
 		return xerr.Wrap(

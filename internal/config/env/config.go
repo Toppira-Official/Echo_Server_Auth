@@ -7,6 +7,7 @@ import (
 	"github.com/Ali127Dev/xerr"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 type Config struct {
@@ -54,9 +55,10 @@ type LoggerConfig struct {
 	Compress   bool   `env:"COMPRESS" env-default:"true"`
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig(logger *zap.Logger) (*Config, error) {
 	if os.Getenv("APP_MODE") != "production" {
-		_ = godotenv.Load()
+		err := godotenv.Load()
+		logger.Error("Error loading .env file: %v", zap.Error(err))
 	}
 
 	var cfg Config

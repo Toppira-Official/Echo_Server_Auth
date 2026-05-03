@@ -44,8 +44,8 @@ var Module = fx.Module(
 				DB:       cfg.DB.PostgresDB,
 			}
 		},
-		func(cfg *env.Config) gin.GinEngineConfig {
-			return gin.GinEngineConfig{
+		func(cfg *env.Config) gin.EngineConfig {
+			return gin.EngineConfig{
 				Mode:    cfg.App.Mode,
 				Port:    cfg.App.Port,
 				Origins: cfg.App.AppOrigins,

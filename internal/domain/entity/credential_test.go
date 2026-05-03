@@ -32,7 +32,6 @@ func TestNewCredential(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			cred, err := NewCredential(
 				credentialID,
 				tt.username,
@@ -67,7 +66,6 @@ func TestNewCredential(t *testing.T) {
 }
 
 func TestCredential_ChangePassword(t *testing.T) {
-
 	now := time.Now().UTC()
 	newTime := now.Add(time.Hour)
 

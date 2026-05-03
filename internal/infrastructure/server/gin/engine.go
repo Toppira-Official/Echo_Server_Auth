@@ -3,7 +3,6 @@ package gin
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -11,15 +10,16 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
-type GinEngineConfig struct {
+type EngineConfig struct {
 	Mode    string
 	Port    int
 	Origins []string
 }
 
-func NewGinEngine(lc fx.Lifecycle, cfg GinEngineConfig) *gin.Engine {
+func NewGinEngine(lc fx.Lifecycle, cfg EngineConfig, logger *zap.Logger) *gin.Engine {
 	switch cfg.Mode {
 	case "prod":
 	case "production":
@@ -54,7 +54,7 @@ func NewGinEngine(lc fx.Lifecycle, cfg GinEngineConfig) *gin.Engine {
 		OnStart: func(ctx context.Context) error {
 			go func() {
 				if err := srv.ListenAndServe(); err != nil {
-					log.Printf("http server listen error: %v\n", err)
+					logger.Error("http server listen error: %v\n", zap.Error(err))
 				}
 			}()
 
