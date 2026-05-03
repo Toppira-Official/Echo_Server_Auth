@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/Ali127Dev/xerr"
 	"github.com/IBM/sarama"
+	"github.com/avast/retry-go"
 	"go.uber.org/fx"
 )
 
@@ -25,7 +27,28 @@ func NewKafkaProducer(lc fx.Lifecycle, cfg KafkaProducerConfig) (sarama.SyncProd
 	config.Producer.Compression = sarama.CompressionZSTD
 	config.Producer.Timeout = 5 * time.Second
 
-	producer, err := sarama.NewSyncProducer(cfg.Brokers, config)
+	var producer sarama.SyncProducer
+
+	err := retry.Do(
+		func() error {
+			p, err := sarama.NewSyncProducer(cfg.Brokers, config)
+			if err != nil {
+				return xerr.Wrap(
+					err,
+					xerr.CodeServiceUnavailable,
+					xerr.WithMessage("failed to connect to Kafka brokers"),
+					xerr.WithMeta("brokers", cfg.Brokers),
+				)
+			}
+
+			producer = p
+			return nil
+		},
+		retry.Attempts(5),
+		retry.Delay(time.Second),
+		retry.LastErrorOnly(true),
+	)
+
 	if err != nil {
 		return nil, err
 	}
