@@ -9,7 +9,7 @@ import (
 )
 
 type KafkaProducerConfig struct {
-	brokers []string
+	Brokers []string
 }
 
 func NewKafkaProducer(lc fx.Lifecycle, cfg KafkaProducerConfig) (sarama.SyncProducer, error) {
@@ -25,7 +25,7 @@ func NewKafkaProducer(lc fx.Lifecycle, cfg KafkaProducerConfig) (sarama.SyncProd
 	config.Producer.Compression = sarama.CompressionZSTD
 	config.Producer.Timeout = 5 * time.Second
 
-	producer, err := sarama.NewSyncProducer(cfg.brokers, config)
+	producer, err := sarama.NewSyncProducer(cfg.Brokers, config)
 	if err != nil {
 		return nil, err
 	}

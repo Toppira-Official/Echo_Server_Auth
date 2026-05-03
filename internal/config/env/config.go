@@ -16,6 +16,7 @@ type Config struct {
 	DB     DBConfig     `env-prefix:"DB_"`
 	Cache  CacheConfig  `env-prefix:"CACHE_"`
 	Logger LoggerConfig `env-prefix:"LOG_"`
+	Kafka  KafkaConfig  `env-prefix:"KAFKA_"`
 }
 
 type AppConfig struct {
@@ -53,6 +54,10 @@ type LoggerConfig struct {
 	MaxBackups int    `env:"MAX_BACKUPS" env-default:"10"`
 	MaxAge     int    `env:"MAX_AGE_DAYS" env-default:"30"`
 	Compress   bool   `env:"COMPRESS" env-default:"true"`
+}
+
+type KafkaConfig struct {
+	Brokers []string `env:"BROKERS" env-separator:","`
 }
 
 func NewConfig(logger *zap.Logger) (*Config, error) {
