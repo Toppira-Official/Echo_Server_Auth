@@ -34,10 +34,8 @@ func NewRegister(registerUsecase *usecase.Register) *Register {
 func (r *Register) Register(c *gin.Context) {
 	var input dto.RegisterInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.Error(
-			c.Error(
-				xerr.Wrap(err, xerr.CodeBadRequest, xerr.WithMessage("invalid request body")),
-			),
+		_ = c.Error(
+			xerr.Wrap(err, xerr.CodeBadRequest, xerr.WithMessage("invalid request body")),
 		)
 		return
 	}
@@ -50,7 +48,7 @@ func (r *Register) Register(c *gin.Context) {
 	}
 	registerUsecaseOutput, err := r.registerUsecase.Execute(c.Request.Context(), registerUsecaseInput)
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 

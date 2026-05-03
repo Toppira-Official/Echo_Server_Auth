@@ -55,6 +55,14 @@ func NewDevice(
 	}, nil
 }
 
+func (d *Device) ID() vo.DeviceID               { return d.id }
+func (d *Device) CredentialID() vo.CredentialID { return d.credentialID }
+func (d *Device) RefreshToken() string          { return d.refreshToken }
+func (d *Device) UserAgent() string             { return d.userAgent }
+func (d *Device) IPAddress() string             { return d.ipAddress }
+func (d *Device) ExpiresAt() time.Time          { return d.expiresAt }
+func (d *Device) LastUsedAt() time.Time         { return d.lastUsedAt }
+
 func (d *Device) UpdateRefreshToken(token string, expiresAt time.Time, nowUTC time.Time) {
 	d.refreshToken = token
 	d.expiresAt = expiresAt

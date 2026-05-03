@@ -35,7 +35,7 @@ func NewLogin(loginUsecase *usecase.Login) *Login {
 func (l *Login) Login(c *gin.Context) {
 	var input dto.LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.Error(
+		_ = c.Error(
 			xerr.Wrap(err, xerr.CodeBadRequest, xerr.WithMessage("invalid request body")),
 		)
 		return
@@ -49,7 +49,7 @@ func (l *Login) Login(c *gin.Context) {
 	}
 	loginUsecaseOutput, err := l.loginUsecase.Execute(c.Request.Context(), loginUsecaseInput)
 	if err != nil {
-		c.Error(err)
+		_ = c.Error(err)
 		return
 	}
 
