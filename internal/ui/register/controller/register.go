@@ -29,6 +29,7 @@ func NewRegister(registerUsecase *usecase.Register) *Register {
 //	@Success		201		{object}	dto.RegisterOutput
 //	@Failure		400		{object}	xerr.SwaggerErrOutput	"Invalid input"
 //	@Failure		401		{object}	xerr.SwaggerErrOutput	"Invalid credentials"
+//	@Failure		409		{object}	xerr.SwaggerErrOutput	"Duplicate username"
 //	@Failure		500		{object}	xerr.SwaggerErrOutput	"Internal server error"
 //	@Router			/api/v1/auth/register [post]
 func (r *Register) Register(c *gin.Context) {

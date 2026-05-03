@@ -8,7 +8,7 @@ import (
 	"errors"
 
 	"github.com/Ali127Dev/xerr"
-	"github.com/jackc/pgx/v5/pgconn"
+	"gorm.io/gorm"
 )
 
 type CredentialCommand struct {
@@ -24,34 +24,13 @@ func (c *CredentialCommand) Create(ctx context.Context, credential *entity.Crede
 
 	err := c.q.WithContext(ctx).Credential.Create(model)
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			switch pgErr.Code {
-			case "23505": // unique_violation
-				return xerr.Wrap(
-					err,
-					xerr.CodeDuplicateKey,
-					xerr.WithMessage("credential already exists"),
-					xerr.WithMeta("entity", "credential"),
-					xerr.WithMeta("constraint", pgErr.ConstraintName),
-				)
-			case "23503": // foreign_key_violation
-				return xerr.Wrap(
-					err,
-					xerr.CodeForeignKeyError,
-					xerr.WithMessage("invalid foreign key reference"),
-					xerr.WithMeta("entity", "credential"),
-					xerr.WithMeta("constraint", pgErr.ConstraintName),
-				)
-			case "23502": // not_null_violation
-				return xerr.Wrap(
-					err,
-					xerr.CodeBadRequest,
-					xerr.WithMessage("missing required field"),
-					xerr.WithMeta("entity", "credential"),
-					xerr.WithMeta("column", pgErr.ColumnName),
-				)
-			}
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return xerr.Wrap(
+				err,
+				xerr.CodeDuplicateKey,
+				xerr.WithMessage("credential already exists"),
+				xerr.WithMeta("entity", "credential"),
+			)
 		}
 
 		return xerr.Wrap(

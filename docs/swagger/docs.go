@@ -114,6 +114,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/Error"
                         }
                     },
+                    "409": {
+                        "description": "Duplicate username",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
