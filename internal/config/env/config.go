@@ -7,7 +7,6 @@ import (
 	"github.com/Ali127Dev/xerr"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
-	"go.uber.org/zap"
 )
 
 type Config struct {
@@ -60,10 +59,9 @@ type KafkaConfig struct {
 	Brokers []string `env:"BROKERS" env-separator:","`
 }
 
-func NewConfig(logger *zap.Logger) (*Config, error) {
+func NewConfig() (*Config, error) {
 	if os.Getenv("APP_MODE") != "production" {
-		err := godotenv.Load()
-		logger.Error("Error loading .env file: %v", zap.Error(err))
+		_ = godotenv.Load()
 	}
 
 	var cfg Config

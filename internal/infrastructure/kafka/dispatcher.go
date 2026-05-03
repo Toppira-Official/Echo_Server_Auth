@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"auth/internal/domain/contract"
 	"context"
 	"encoding/json"
 
@@ -15,7 +16,7 @@ func NewDispatcher(producer sarama.SyncProducer) *Dispatcher {
 	return &Dispatcher{producer: producer}
 }
 
-func (k *Dispatcher) Dispatch(ctx context.Context, events ...interface{}) error {
+func (k *Dispatcher) Dispatch(ctx context.Context, events ...contract.Event) error {
 	for _, event := range events {
 		payload, err := json.Marshal(event)
 		if err != nil {

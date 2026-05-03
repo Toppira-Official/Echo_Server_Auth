@@ -27,6 +27,7 @@ var Module = fx.Module(
 		gin.NewGinEngine,
 		daoquery.NewDaoQuery,
 		logger.NewZapLogger,
+		kafka.NewKafkaProducer,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),
