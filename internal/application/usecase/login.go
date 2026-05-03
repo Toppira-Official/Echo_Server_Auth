@@ -17,17 +17,20 @@ type Login struct {
 	credentialQuery contract.CredentialQuery
 	passwordEncoder contract.PasswordEncoder
 	session         *service.Session
+	tx              contract.TransactionProvider
 }
 
 func NewLogin(
 	credentialQuery contract.CredentialQuery,
 	passwordEncoder contract.PasswordEncoder,
 	session *service.Session,
+	tx contract.TransactionProvider,
 ) *Login {
 	return &Login{
 		credentialQuery: credentialQuery,
 		passwordEncoder: passwordEncoder,
 		session:         session,
+		tx:              tx,
 	}
 }
 
@@ -42,15 +45,24 @@ type LoginOutput struct {
 }
 
 func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutput, err error) {
-	credential, err := l.authenticate(ctx, input.Username, input.Password)
-	if err != nil {
-		return output, ErrLoginInvalidCredentials
-	}
+	var credential *entity.Credential
+	var tokens service.SessionTokens
 
-	tokens, err := l.session.Create(ctx, credential.ID(), input.UserAgent, input.IpAddress)
-	if err != nil {
-		return output, err
-	}
+	err = l.tx.Do(ctx, func(ctx context.Context) error {
+		cred, err := l.authenticate(ctx, input.Username, input.Password)
+		if err != nil {
+			return ErrLoginInvalidCredentials
+		}
+		credential = cred
+
+		tok, err := l.session.Create(ctx, credential.ID(), input.UserAgent, input.IpAddress)
+		if err != nil {
+			return err
+		}
+		tokens = tok
+
+		return nil
+	})
 
 	return LoginOutput{
 		SessionTokens: tokens,

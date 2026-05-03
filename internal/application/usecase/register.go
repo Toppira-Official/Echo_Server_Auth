@@ -17,6 +17,7 @@ type Register struct {
 	clock             contract.Clock
 	session           *service.Session
 	eventDispatcher   contract.EventDispatcher
+	tx                contract.TransactionProvider
 }
 
 func NewRegister(
@@ -27,6 +28,7 @@ func NewRegister(
 	clock contract.Clock,
 	session *service.Session,
 	eventDispatcher contract.EventDispatcher,
+	tx contract.TransactionProvider,
 ) *Register {
 	return &Register{
 		credentialQuery:   credentialQuery,
@@ -36,6 +38,7 @@ func NewRegister(
 		clock:             clock,
 		session:           session,
 		eventDispatcher:   eventDispatcher,
+		tx:                tx,
 	}
 }
 
@@ -50,22 +53,30 @@ type RegisterOutput struct {
 }
 
 func (r *Register) Execute(ctx context.Context, input RegisterInput) (output RegisterOutput, err error) {
-	newCredential, err := r.authenticate(ctx, input.Username, input.Password)
-	if err != nil {
-		return output, err
-	}
+	var newCredential *entity.Credential
+	var tokens service.SessionTokens
 
-	tokens, err := r.session.Create(ctx, newCredential.ID(), input.UserAgent, input.IpAddress)
-	if err != nil {
-		return output, err
-	}
+	err = r.tx.Do(ctx, func(txCtx context.Context) error {
+		cred, err := r.authenticate(txCtx, input.Username, input.Password)
+		if err != nil {
+			return err
+		}
+		newCredential = cred
+
+		tok, err := r.session.Create(txCtx, cred.ID(), input.UserAgent, input.IpAddress)
+		if err != nil {
+			return err
+		}
+		tokens = tok
+
+		return nil
+	})
 
 	event := event.UserRegistered{
 		UserID:     newCredential.ID().Value(),
 		Username:   newCredential.Username(),
 		OccurredAt: r.clock.NowUTC(),
 	}
-
 	if err := r.eventDispatcher.Dispatch(ctx, event); err != nil {
 		return RegisterOutput{}, err
 	}
