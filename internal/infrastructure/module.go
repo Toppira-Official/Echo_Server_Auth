@@ -12,6 +12,7 @@ import (
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/kafka"
 	"auth/internal/infrastructure/logger"
+	"auth/internal/infrastructure/outbox"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
 	"auth/internal/infrastructure/server/gin"
@@ -29,6 +30,8 @@ var Module = fx.Module(
 		daoquery.NewDaoQuery,
 		logger.NewZapLogger,
 		kafka.NewProducer,
+		outbox.NewPublisher,
+		outbox.NewStore,
 		fx.Annotate(
 			uuid.NewKsuidIdGenerator,
 			fx.As(new(contract.UuidGenerator)),
@@ -73,5 +76,8 @@ var Module = fx.Module(
 			transaction.NewGormTransaction,
 			fx.As(new(contract.TransactionProvider)),
 		),
+	),
+	fx.Invoke(
+		outbox.Start,
 	),
 )
