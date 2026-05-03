@@ -126,9 +126,6 @@ func TestAuthTokenPayload_Immutability(t *testing.T) {
 
 	payload, _ := NewAccessTokenPayload(credentialID, issued, expired)
 
-	retrievedIssued := payload.IssuedAtUTC()
-	retrievedIssued = retrievedIssued.Add(9999 * time.Hour)
-
 	if payload.IssuedAtUTC() != issued {
 		t.Fatal("AuthTokenPayload is expected to be immutable but state was mutated")
 	}
