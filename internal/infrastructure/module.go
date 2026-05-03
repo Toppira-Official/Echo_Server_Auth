@@ -9,6 +9,7 @@ import (
 	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/gorm/query"
 	"auth/internal/infrastructure/db/postgres"
+	"auth/internal/infrastructure/kafka"
 	"auth/internal/infrastructure/logger"
 	"auth/internal/infrastructure/password"
 	refreshtoken "auth/internal/infrastructure/refresh_token"
@@ -61,6 +62,10 @@ var Module = fx.Module(
 		fx.Annotate(
 			query.NewCredentialQuery,
 			fx.As(new(contract.CredentialQuery)),
+		),
+		fx.Annotate(
+			kafka.NewDispatcher,
+			fx.As(new(contract.EventDispatcher)),
 		),
 	),
 )
