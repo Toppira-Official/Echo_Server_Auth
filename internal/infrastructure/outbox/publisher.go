@@ -7,13 +7,14 @@ import (
 	"github.com/Ali127Dev/xoutbox"
 	"github.com/Ali127Dev/xoutbox/kafka"
 	"github.com/IBM/sarama"
+	"go.uber.org/fx"
 )
 
 type PublisherConfig struct {
 	Brokers []string
 }
 
-func NewPublisher(cfg PublisherConfig) (xoutbox.Publisher[string], error) {
+func NewPublisher(lc fx.Lifecycle, cfg PublisherConfig) (xoutbox.Publisher[string], error) {
 	publisher, err := kafka.NewPublisher[string](kafka.Config{
 		Brokers:      cfg.Brokers,
 		RequiredAcks: sarama.WaitForAll,
@@ -28,6 +29,8 @@ func NewPublisher(cfg PublisherConfig) (xoutbox.Publisher[string], error) {
 			xerr.WithMessage("failed to open kafka connection"),
 		)
 	}
+
+	lc.Append(fx.StopHook(publisher.Close))
 
 	return publisher, nil
 }
