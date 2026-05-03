@@ -20,7 +20,7 @@ func Start(
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			go worker.Start(ctx)
+			go worker.Start(context.Background())
 			return nil
 		},
 	})
