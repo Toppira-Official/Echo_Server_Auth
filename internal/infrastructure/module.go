@@ -10,7 +10,7 @@ import (
 	"auth/internal/infrastructure/db/gorm/query"
 	"auth/internal/infrastructure/db/gorm/transaction"
 	"auth/internal/infrastructure/db/postgres"
-	"auth/internal/infrastructure/kafka"
+	"auth/internal/infrastructure/dispatcher"
 	"auth/internal/infrastructure/logger"
 	"auth/internal/infrastructure/outbox"
 	"auth/internal/infrastructure/password"
@@ -29,7 +29,6 @@ var Module = fx.Module(
 		gin.NewGinEngine,
 		daoquery.NewDaoQuery,
 		logger.NewZapLogger,
-		kafka.NewProducer,
 		outbox.NewPublisher,
 		outbox.NewStore,
 		fx.Annotate(
@@ -69,7 +68,7 @@ var Module = fx.Module(
 			fx.As(new(contract.CredentialQuery)),
 		),
 		fx.Annotate(
-			kafka.NewDispatcher,
+			dispatcher.NewDispatcher,
 			fx.As(new(contract.EventDispatcher)),
 		),
 		fx.Annotate(

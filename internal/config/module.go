@@ -6,7 +6,6 @@ import (
 	accesstoken "auth/internal/infrastructure/access_token"
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/db/postgres"
-	"auth/internal/infrastructure/kafka"
 	"auth/internal/infrastructure/logger"
 	"auth/internal/infrastructure/server/gin"
 
@@ -60,11 +59,6 @@ var Module = fx.Module(
 				MaxBackups: cfg.Logger.MaxBackups,
 				MaxAge:     cfg.Logger.MaxAge,
 				Compress:   cfg.Logger.Compress,
-			}
-		},
-		func(cfg *env.Config) kafka.ProducerConfig {
-			return kafka.ProducerConfig{
-				Brokers: cfg.Kafka.Brokers,
 			}
 		},
 	),
