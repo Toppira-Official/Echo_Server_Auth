@@ -7,6 +7,7 @@ import (
 	"auth/internal/infrastructure/cache/redis"
 	"auth/internal/infrastructure/db/postgres"
 	"auth/internal/infrastructure/logger"
+	"auth/internal/infrastructure/outbox"
 	"auth/internal/infrastructure/server/gin"
 
 	"go.uber.org/fx"
@@ -59,6 +60,11 @@ var Module = fx.Module(
 				MaxBackups: cfg.Logger.MaxBackups,
 				MaxAge:     cfg.Logger.MaxAge,
 				Compress:   cfg.Logger.Compress,
+			}
+		},
+		func(cfg *env.Config) outbox.PublisherConfig {
+			return outbox.PublisherConfig{
+				Brokers: cfg.Kafka.Brokers,
 			}
 		},
 	),
