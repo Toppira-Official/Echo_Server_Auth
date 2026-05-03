@@ -10,11 +10,11 @@ import (
 	"go.uber.org/fx"
 )
 
-type KafkaProducerConfig struct {
+type ProducerConfig struct {
 	Brokers []string
 }
 
-func NewKafkaProducer(lc fx.Lifecycle, cfg KafkaProducerConfig) (sarama.SyncProducer, error) {
+func NewProducer(lc fx.Lifecycle, cfg ProducerConfig) (sarama.SyncProducer, error) {
 	config := sarama.NewConfig()
 
 	config.Producer.RequiredAcks = sarama.WaitForAll

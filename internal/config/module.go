@@ -62,8 +62,8 @@ var Module = fx.Module(
 				Compress:   cfg.Logger.Compress,
 			}
 		},
-		func(cfg *env.Config) kafka.KafkaProducerConfig {
-			return kafka.KafkaProducerConfig{
+		func(cfg *env.Config) kafka.ProducerConfig {
+			return kafka.ProducerConfig{
 				Brokers: cfg.Kafka.Brokers,
 			}
 		},
