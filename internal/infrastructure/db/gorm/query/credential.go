@@ -4,6 +4,7 @@ import (
 	"auth/internal/domain/entity"
 	"auth/internal/domain/vo"
 	"auth/internal/infrastructure/db/gorm/dao"
+	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/gorm/mapper"
 	"context"
 	"errors"
@@ -21,7 +22,9 @@ func NewCredentialQuery(q *dao.Query) *CredentialQuery {
 }
 
 func (c *CredentialQuery) FindByID(ctx context.Context, id vo.CredentialID) (*entity.Credential, error) {
-	model, err := c.q.WithContext(ctx).Credential.Where(c.q.Credential.ID.Eq(id.Value())).First()
+	q := daoquery.ResolveQuery(ctx, c.q)
+
+	model, err := q.WithContext(ctx).Credential.Where(q.Credential.ID.Eq(id.Value())).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xerr.New(xerr.CodeNotFound, xerr.WithMessage("credential not found with ID: "+id.Value()))
@@ -33,7 +36,9 @@ func (c *CredentialQuery) FindByID(ctx context.Context, id vo.CredentialID) (*en
 }
 
 func (c *CredentialQuery) FindByUsername(ctx context.Context, username string) (credential *entity.Credential, err error) {
-	model, err := c.q.WithContext(ctx).Credential.Where(c.q.Credential.Username.Eq(username)).First()
+	q := daoquery.ResolveQuery(ctx, c.q)
+
+	model, err := q.WithContext(ctx).Credential.Where(q.Credential.Username.Eq(username)).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, xerr.New(xerr.CodeNotFound, xerr.WithMessage("credential not found with username: "+username))
@@ -45,9 +50,11 @@ func (c *CredentialQuery) FindByUsername(ctx context.Context, username string) (
 }
 
 func (c *CredentialQuery) ExistsByUsername(ctx context.Context, username string) (bool, error) {
-	_, err := c.q.WithContext(ctx).Credential.
-		Select(c.q.Credential.ID).
-		Where(c.q.Credential.Username.Eq(username)).
+	q := daoquery.ResolveQuery(ctx, c.q)
+
+	_, err := q.WithContext(ctx).Credential.
+		Select(q.Credential.ID).
+		Where(q.Credential.Username.Eq(username)).
 		First()
 
 	if err != nil {

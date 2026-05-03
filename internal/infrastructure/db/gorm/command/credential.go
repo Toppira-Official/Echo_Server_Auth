@@ -3,6 +3,7 @@ package command
 import (
 	"auth/internal/domain/entity"
 	"auth/internal/infrastructure/db/gorm/dao"
+	"auth/internal/infrastructure/db/gorm/daoquery"
 	"auth/internal/infrastructure/db/gorm/mapper"
 	"context"
 	"errors"
@@ -20,9 +21,11 @@ func NewCredentialCommand(q *dao.Query) *CredentialCommand {
 }
 
 func (c *CredentialCommand) Create(ctx context.Context, credential *entity.Credential) error {
+	q := daoquery.ResolveQuery(ctx, c.q)
+
 	model := mapper.CredentialEntityToModel(credential)
 
-	err := c.q.WithContext(ctx).Credential.Create(model)
+	err := q.WithContext(ctx).Credential.Create(model)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return xerr.Wrap(
@@ -46,12 +49,14 @@ func (c *CredentialCommand) Create(ctx context.Context, credential *entity.Crede
 }
 
 func (c *CredentialCommand) Update(ctx context.Context, credential *entity.Credential) error {
+	q := daoquery.ResolveQuery(ctx, c.q)
+
 	model := mapper.CredentialEntityToModel(credential)
 
-	_, err := c.q.
+	_, err := q.
 		WithContext(ctx).
 		Credential.
-		Where(c.q.Credential.ID.Eq(model.ID)).
+		Where(q.Credential.ID.Eq(model.ID)).
 		Updates(model)
 
 	if err != nil {
