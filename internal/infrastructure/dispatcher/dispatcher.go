@@ -33,7 +33,7 @@ func (k *Dispatcher) Dispatch(ctx context.Context, events ...contract.Event) err
 		err = k.store.InsertEvent(ctx, xoutbox.Event[string]{
 			ID:         uuid,
 			Payload:    payload,
-			EventType:  topicFor(event),
+			EventType:  "user.registered",
 			MaxRetries: 5,
 			CreatedAt:  k.clock.NowUTC(),
 			Status:     xoutbox.StatusPending,
