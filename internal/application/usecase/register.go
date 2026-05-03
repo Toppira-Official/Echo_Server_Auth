@@ -4,6 +4,7 @@ import (
 	"auth/internal/application/service"
 	"auth/internal/domain/contract"
 	"auth/internal/domain/entity"
+	"auth/internal/domain/event"
 	"auth/internal/domain/vo"
 	"context"
 )
@@ -15,6 +16,7 @@ type Register struct {
 	uuidGenerator     contract.UuidGenerator
 	clock             contract.Clock
 	session           *service.Session
+	eventDispatcher   contract.EventDispatcher
 }
 
 func NewRegister(
@@ -24,6 +26,7 @@ func NewRegister(
 	uuidGenerator contract.UuidGenerator,
 	clock contract.Clock,
 	session *service.Session,
+	eventDispatcher contract.EventDispatcher,
 ) *Register {
 	return &Register{
 		credentialQuery:   credentialQuery,
@@ -32,6 +35,7 @@ func NewRegister(
 		uuidGenerator:     uuidGenerator,
 		clock:             clock,
 		session:           session,
+		eventDispatcher:   eventDispatcher,
 	}
 }
 
@@ -54,6 +58,16 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 	tokens, err := r.session.Create(ctx, newCredential.ID(), input.UserAgent, input.IpAddress)
 	if err != nil {
 		return output, err
+	}
+
+	event := event.UserRegistered{
+		UserID:     newCredential.ID().Value(),
+		Username:   newCredential.Username(),
+		OccurredAt: r.clock.NowUTC(),
+	}
+
+	if err := r.eventDispatcher.Dispatch(ctx, event); err != nil {
+		return RegisterOutput{}, err
 	}
 
 	return RegisterOutput{
