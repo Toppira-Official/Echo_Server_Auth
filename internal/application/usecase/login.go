@@ -63,6 +63,9 @@ func (l *Login) Execute(ctx context.Context, input LoginInput) (output LoginOutp
 
 		return nil
 	})
+	if err != nil {
+		return output, err
+	}
 
 	return LoginOutput{
 		SessionTokens: tokens,

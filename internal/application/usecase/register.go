@@ -71,6 +71,9 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 
 		return nil
 	})
+	if err != nil {
+		return output, err
+	}
 
 	event := event.UserRegistered{
 		UserID:     newCredential.ID().Value(),
@@ -78,7 +81,7 @@ func (r *Register) Execute(ctx context.Context, input RegisterInput) (output Reg
 		OccurredAt: r.clock.NowUTC(),
 	}
 	if err := r.eventDispatcher.Dispatch(ctx, event); err != nil {
-		return RegisterOutput{}, err
+		return output, err
 	}
 
 	return RegisterOutput{
